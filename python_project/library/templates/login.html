@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tên Web thư viện</title>
+    <link rel="stylesheet" href="{% static 'css/home-page.css' %}">
+</head>
+<body>
+<div class="container">
+    <h1>Tên Web thư viện</h1>
+    <div class="login-box">
+        <h2>Đăng nhập</h2>
+        <p class="subtitle">Chưa có tài khoản? <a href="#">Đăng ký ngay</a></p>
+        <form>
+            <div class="input-group">
+                <label for="email">Tên người dùng hoặc Email*</label>
+                <input type="text" id="email" placeholder="Nhập tên người dùng hoặc email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Mật khẩu*</label>
+                <input type="password" id="password" placeholder="Nhập mật khẩu" required>
+            </div>
+            <button type="submit" class="login-btn">Đăng nhập</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
