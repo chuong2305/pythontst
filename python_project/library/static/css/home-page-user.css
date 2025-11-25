@@ -1,0 +1,142 @@
+/* Tổng thể */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Khung tổng */
+.wrapper {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #1e3a5f, #162d47);
+    color: white;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    z-index: 100;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+    padding: 20px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h2 {
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Menu */
+.nav-menu ul {
+    list-style: none;
+    padding: 0;
+}
+
+.nav-menu li {
+    width: 100%;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 15px;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-item i {
+    width: 25px;
+    text-align: center;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.menu-item.active {
+    background-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+}
+
+/* Main content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+/* Thanh tiêu đề */
+.topbar {
+    background: white;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 50;
+}
+
+.page-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+/* Nội dung */
+.content-area {
+    flex: 1;
+    padding: 0;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+    .menu-item span {
+        display: none;
+    }
+    .topbar {
+        font-size: 16px;
+    }
+}
