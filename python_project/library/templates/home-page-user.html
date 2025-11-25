@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang người dùng - Thư viện</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}" />
+</head>
+<body>
+<div class="wrapper">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Thư viện</h2>
+        </div>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="user-books-author.html" class="menu-item active"><i class="fas fa-book"></i> <span>Danh sách sách / tác giả</span></a>
+                </li>
+                <li><a href="user-categories.html" class="menu-item"><i class="fas fa-tags"></i> <span>Danh sách thể loại</span></a>
+                </li>
+                <li><a href="user-borrowed.html" class="menu-item"><i class="fas fa-hand-holding"></i> <span>Sách đang mượn</span></a>
+                </li>
+                <li><a href="user-settings.html" class="menu-item"><i class="fas fa-cog"></i> <span>Cài đặt</span></a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content" id="main">
+        <header class="topbar">
+            <div class="page-title" id="pageTitle">Danh sách sách / tác giả</div>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>User</span>
+            </div>
+        </header>
+        <div class="content-area">
+            <iframe src="user-books.html" id="pageFrame" frameborder="0"></iframe>
+        </div>
+    </main>
+
+</div>
+
+<script>
+    // Chuyển trang trong iframe
+    var menuItems = document.getElementsByClassName('menu-item');
+    for (var i = 0; i < menuItems.length; i++) {
+        menuItems[i].onclick = function (event) {
+            event.preventDefault();
+
+            // Đổi src iframe
+            document.getElementById('pageFrame').src = this.getAttribute('href');
+
+            // Cập nhật tiêu đề trang
+            document.getElementById('pageTitle').textContent = this.textContent.trim();
+
+            // Đổi trạng thái active
+            for (var j = 0; j < menuItems.length; j++) {
+                menuItems[j].classList.remove('active');
+            }
+            this.classList.add('active');
+        };
+    }
+</script>
+
+</body>
+</html>
