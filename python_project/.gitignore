@@ -1,0 +1,15 @@
+# Bỏ qua file rác khi chạy Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Bỏ qua database local (để tránh xung đột dữ liệu với người khác)
+db.sqlite3
+
+# Bỏ qua file môi trường ảo (nếu có)
+env/
+venv/
+.env
+
+# Bỏ qua file hệ thống VS Code
+.vscode/
