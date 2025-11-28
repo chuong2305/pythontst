@@ -13,14 +13,20 @@
     <div class="login-box">
         <h2>Đăng nhập</h2>
         <p class="subtitle">Chưa có tài khoản? <a href="#">Đăng ký ngay</a></p>
-        <form>
+        {% if error %}
+            <div style="color: red; margin-bottom: 15px; padding: 10px; background-color: #ffcccc; border-radius: 4px;">
+                {{ error }}
+            </div>
+        {% endif %}
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
             <div class="input-group">
-                <label for="email">Tên người dùng hoặc Email*</label>
-                <input type="text" id="email" placeholder="Nhập tên người dùng hoặc email" required>
+                <label for="username">Tên người dùng hoặc Email*</label>
+                <input type="text" id="username" name="username" placeholder="Nhập tên người dùng hoặc email" required>
             </div>
             <div class="input-group">
                 <label for="password">Mật khẩu*</label>
-                <input type="password" id="password" placeholder="Nhập mật khẩu" required>
+                <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
             </div>
             <button type="submit" class="login-btn">Đăng nhập</button>
         </form>

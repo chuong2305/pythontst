@@ -21,7 +21,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 260px;
+    width: 270px;
     background: linear-gradient(180deg, #1e3a5f, #162d47);
     color: white;
     transition: all 0.3s ease;
@@ -106,7 +106,13 @@ body {
     font-weight: 600;
     color: #1a1a1a;
 }
-
+.user-wrapper {
+  position: relative; /* Để menu con định vị theo khung này */
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
 .user-info {
     display: flex;
     align-items: center;
@@ -114,7 +120,67 @@ body {
     font-size: 0.95rem;
     color: #555;
 }
+.user-info:hover {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.1
+  ); /* Hiệu ứng sáng lên khi rê chuột */
+}
+.user-info i {
+  font-size: 1.6rem;
+  color: #666;
+}
 
+.header__user-dropdown {
+  position: absolute;
+  top: 100%; /* Nằm ngay dưới thanh topbar */
+  right: 0; /* Canh lề phải */
+  background-color: #ffffff;
+  list-style: none;
+  width: 150px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+
+  /* Ẩn menu đi mặc định */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.header__user-dropdown li {
+  border-bottom: 1px solid #eee;
+}
+
+.header__user-dropdown li:last-child {
+  border-bottom: none;
+}
+
+.header__user-dropdown a {
+  display: block;
+  padding: 12px 15px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.header__user-dropdown a:hover {
+  background-color: #f8f9fa;
+  color: #007bff;
+}
+
+/* Hiệu ứng hiển thị Menu khi rê chuột (Hover) */
+/* Khi rê chuột vào .user-wrapper, thì .header__user-dropdown sẽ hiện ra */
+.user-wrapper:hover .header__user-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
 /* Nội dung */
 .content-area {
     flex: 1;

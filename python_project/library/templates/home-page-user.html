@@ -32,12 +32,33 @@
 
     <!-- Main -->
     <main class="main-content" id="main">
+
         <header class="topbar">
-            <div class="page-title" id="pageTitle">Danh sách sách / tác giả</div>
+            <div class="page-title" id="pageTitle">User Page</div>
+
+<div class="user-wrapper">
             <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <span>User</span>
+              <i class="fas fa-user-circle"></i>
+              <span>Admin</span>
+              <i
+                class="fas fa-chevron-down"
+                style="font-size: 12px; margin-left: 5px"
+              ></i>
             </div>
+            <ul class="header__user-dropdown">
+              <li>
+                <a href="user-infor.html"
+                  ><i class="fas fa-id-card"></i> Hồ Sơ</a
+                >
+              </li>
+              <li>
+                <a href="{% url 'login_view' %}"
+                  ><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a
+                >
+              </li>
+            </ul>
+          </div>
+
         </header>
         <div class="content-area">
             <iframe src="user-books.html" id="pageFrame" frameborder="0"></iframe>
