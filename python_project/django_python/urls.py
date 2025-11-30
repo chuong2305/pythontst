@@ -26,6 +26,8 @@ urlpatterns = [
     path('login/', views.custom_login, name='login'),
     path('login-view/', views.login_view, name='login_view'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('home/book-author/', views.admin_book_author, name='admin_book_author'),
+    path('home/borrow/', views.admin_borrow, name='admin_borrow'),
 ]
 
 

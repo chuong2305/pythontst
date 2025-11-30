@@ -11,6 +11,12 @@ def home_page_user(request):
 def login_view(request):
     return render(request, 'login.html')
 
+def admin_book_author(request):
+    return render(request, 'admin-book-author.html')
+
+def admin_borrow(request):
+    return render(request, 'admin-borrow.html')
+
 @require_http_methods(["GET", "POST"])
 def custom_login(request):
     if request.method == 'POST':
