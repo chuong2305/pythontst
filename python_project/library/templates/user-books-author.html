@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách sách / Nhà xuất bản</title>
+    <link rel="stylesheet" href="{% static 'css/admin-book-author.css' %}">
+</head>
+<body>
+
+<div class="book-page-container">
+
+    <!-- TOP: SEARCH SECTION -->
+    <div class="top-section">
+        <h2 class="section-title">Tìm kiếm sách</h2>
+        <div class="search-row">
+            <input type="text" class="search-input" placeholder="Nhập tên sách, mã sách, từ khoá..." />
+            <button class="btn-search">Tìm kiếm</button>
+        </div>
+    </div>
+
+    <!-- MIDDLE: FILTER SECTION -->
+    <div class="middle-section">
+        <div class="filter-group">
+            <label>Thể loại</label>
+            <select>
+                <option>Tất cả</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Tác giả</label>
+            <select>
+                <option>Tất cả</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Nhà xuất bản</label>
+            <select>
+                <option>Tất cả</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Ngày nhập</label>
+            <input type="date">
+        </div>
+
+        <div class="filter-group">
+            <label>Trạng thái</label>
+            <select>
+                <option>Tất cả</option>
+                <option>Còn trống</option>
+                <option>Đã được mượn</option>
+                <option>Đã được đặt</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- BOTTOM: BOOK DISPLAY -->
+    <div class="bottom-section">
+        <h2 class="section-title">Danh sách sách</h2>
+
+        <div class="book-display">
+
+            <!-- Example book card -->
+            <div class="book-card">
+                <div class="book-img"></div>
+                <div class="book-info">
+                    <h3 class="book-title">Tên sách mẫu</h3>
+                    <p class="book-author">Tác giả: ABC</p>
+                    <p class="book-status available">Trạng thái: Còn trống</p>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-img"></div>
+                <div class="book-info">
+                    <h3 class="book-title">Book XYZ</h3>
+                    <p class="book-author">Tác giả: DEF</p>
+                    <p class="book-status borrowed">Trạng thái: Đã mượn</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
