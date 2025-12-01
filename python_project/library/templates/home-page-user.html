@@ -18,11 +18,11 @@
         </div>
         <nav class="nav-menu">
             <ul>
-                <li><a href="user-books-author.html" class="menu-item active"><i class="fas fa-book"></i> <span>Danh sách sách / tác giả</span></a>
+                <li><a href="{% url 'user_books_author' %}" class="menu-item active"><i class="fas fa-book"></i> <span>Danh sách sách / tác giả</span></a>
                 </li>
-                <li><a href="user-categories.html" class="menu-item"><i class="fas fa-tags"></i> <span>Danh sách thể loại</span></a>
+                <li><a href="{% url 'user_books_type' %}" class="menu-item"><i class="fas fa-tags"></i> <span>Danh sách thể loại</span></a>
                 </li>
-                <li><a href="user-borrowed.html" class="menu-item"><i class="fas fa-hand-holding"></i> <span>Sách đang mượn</span></a>
+                <li><a href="{% url 'user_borrowed' %}" class="menu-item"><i class="fas fa-hand-holding"></i> <span>Sách đang mượn</span></a>
                 </li>
                 <li><a href="user-settings.html" class="menu-item"><i class="fas fa-cog"></i> <span>Cài đặt</span></a>
                 </li>
@@ -39,7 +39,7 @@
 <div class="user-wrapper">
             <div class="user-info">
               <i class="fas fa-user-circle"></i>
-              <span>Admin</span>
+              <span>User</span>
               <i
                 class="fas fa-chevron-down"
                 style="font-size: 12px; margin-left: 5px"
@@ -61,8 +61,11 @@
 
         </header>
         <div class="content-area">
-            <iframe src="user-books.html" id="pageFrame" frameborder="0"></iframe>
+            <iframe src="{% url 'welcome_view' %}" id="pageFrame" frameborder="0"></iframe>
+
         </div>
+        
+
     </main>
 
 </div>

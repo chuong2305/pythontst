@@ -28,6 +28,10 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('home/book-author/', views.admin_book_author, name='admin_book_author'),
     path('home/borrow/', views.admin_borrow, name='admin_borrow'),
+    path("home/welcome/", views.welcome_view, name="welcome_view"),
+    path("home-user/user-books-author/", views.user_books_author, name="user_books_author"),
+    path("home-user/user-books-type/", views.user_books_type, name="user_books_type"),
+    path("home-user/user-borrowed/", views.user_borrowed, name="user_borrowed"),
 ]
 
 

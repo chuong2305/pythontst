@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý mượn trả</title>
+    <link rel="stylesheet" href="{% static 'css/admin-borrow.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/user-borrowed.css' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+    <div class="borrow-wrapper">
+
+        <!-- Search Panel -->
+        <div class="search-panel">
+            <input type="text" placeholder="Tìm người dùng hoặc sách..." />
+            <button><i class="fas fa-search"></i> Tìm</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="borrow">Đã lưu</button>
+            <button class="tab" data-tab="return">Đã mượn</button>
+            <button class="tab" data-tab="returned">Đã trả</button>
+        </div>
+
+        <!-- Borrow Section -->
+        <div class="tab-content" id="borrow" style="display: block;">
+        <div class="book-card">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">Harry Potter</div>
+            <div class="book-category">Thể loại: Giả tưởng</div>
+          </div>
+          <button class="borrow-btn">Xác nhận mượn</button>
+        </div>
+        <div class="book-card">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">The hobbit</div>
+            <div class="book-category">Thể loại: Giả tưởng / Phiêu lưu</div>
+          </div>
+          <button class="borrow-btn">Xác nhận mượn</button>
+        </div>
+        <div class="book-card">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">Percy Jackson & The Lightning Thief</div>
+            <div class="book-category">Thể loại: Giả tưởng / Thần thoại / Phiêu lưu</div>
+          </div>
+          <button class="borrow-btn">Xác nhận mượn</button>
+        </div>
+        </div>
+
+        <!-- Return Section -->
+        <div class="tab-content" id="return">
+            <div class="book-card">
+          <div class="book-image"></div>
+
+          <div class="book-info">
+            <div class="book-title">Harry Potter</div>
+            <div class="book-category">Thời hạn: còn 5 ngày</div>
+          </div>
+
+          <button class="borrow-btn">Xác nhận Trả</button>
+        </div>
+        <div class="book-card">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">The hobbit</div>
+            <div class="book-category">Thời hạn: còn 6 ngày</div>
+          </div>
+          <button class="borrow-btn">Xác nhận Trả</button>
+        </div>
+        <div class="book-card">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">Percy Jackson & The Lightning Thief</div>
+            <div class="book-category">Thời hạn: còn 7 ngày</div>
+          </div>
+          <button class="borrow-btn">Xác nhận trả</button>
+        </div>
+        </div>
+        <div class="tab-content" id="returned">
+            <div class="book-card">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">Harry Potter</div>
+            <div class="book-category">Trạng thái: trả đúng hạn</div>
+          </div>
+          <button class="borrow-btn" disabled>Đã trả sách</button>
+        </div>
+        <div class="book-card">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">The hobbit</div>
+            <div class="book-category">Trạng thái: trả trễ hạn</div>
+          </div>
+          <button class="borrow-btn" disabled>Đã trả sách</button>
+        </div>
+        <div class="book-card">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">Percy Jackson & The Lightning Thief</div>
+            <div class="book-category">Trạng thái: trả đúng hạn</div>
+          </div>
+          <button class="borrow-btn" disabled>Đã trả sách</button>
+        </div>
+        </div>
+    </div>
+    <script>
+    // Tab switching
+    const tabs = document.querySelectorAll('.tab');
+    const contents = document.querySelectorAll('.tab-content');
+
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+
+
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+
+            contents.forEach(c => c.style.display = 'none');
+            document.getElementById(tab.dataset.tab).style.display = 'block';
+        });
+    });
+
+
+    // Add book to borrow list
+    document.querySelectorAll('.add-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const list = document.querySelector('.borrow-list');
+            const li = document.createElement('li');
+            li.innerHTML = 'Sách mới <button class="remove-btn">X</button>';
+            list.appendChild(li);
+        });
+    });
+
+
+    // Remove book from borrow list
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-btn')) {
+            e.target.parentElement.remove();
+        }
+    });
+
+
+    // Return book
+    document.querySelectorAll('.return-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            alert('Đã trả sách thành công!');
+        });
+    });
+    </script>
+</body>
+</html>

@@ -17,6 +17,18 @@ def admin_book_author(request):
 def admin_borrow(request):
     return render(request, 'admin-borrow.html')
 
+def welcome_view(request):
+    return render(request, 'welcome.html')
+
+def user_books_author(request):
+    return render(request, 'user-books-author.html')
+
+def user_books_type(request):
+    return render(request, 'user-books-type.html')
+
+def user_borrowed(request):
+    return render(request, 'user-borrowed.html')
+
 @require_http_methods(["GET", "POST"])
 def custom_login(request):
     if request.method == 'POST':
