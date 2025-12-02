@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}">
+    <link rel="stylesheet" href="{% static 'css/notify.css' %}" />
+</head>
+<body>
+<div class="book-notify">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">Harry Potter</div>
+            <div class="book-category">Thể loại: Giả tưởng</div>
+          </div>
+          <div class="time-return">Thời gian mượn còn lại: còn 1 ngày</div>
+          <button class="borrow-btn">Kiểm tra</button>
+</div>
+<div class="book-notify">
+          <div class="book-image"></div>
+          <div class="book-info">
+            <div class="book-title">The hobbit</div>
+            <div class="book-category">Thể loại: Giả tưởng / Phiêu lưu</div>
+          </div>
+          <div class="time-return">Thời gian mượn còn lại: đã quá hạn</div>
+          <button class="borrow-btn">Kiểm tra</button>
+</div>
+</body>
+</html>

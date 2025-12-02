@@ -1,0 +1,37 @@
+body{
+    margin: 20px;
+    padding-top: 165px;
+}
+.library-card {
+    width: 600px;
+    height: 320px;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    background: #fdfdfd;
+    font-family: sans-serif;
+    margin-left: 300px;
+    padding-left: 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.card-title {
+    font-size: 30px;
+    font-weight: 700;
+}
+.card-text{
+font-size: 25px;
+padding-top: 7px;
+}

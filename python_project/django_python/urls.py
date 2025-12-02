@@ -21,7 +21,7 @@ from library import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
+    path('', views.login_view, name='login_view'),
     path('home-user/', views.home_page_user, name='home_page_user'),
     path('login/', views.custom_login, name='login'),
     path('login-view/', views.login_view, name='login_view'),
@@ -32,6 +32,9 @@ urlpatterns = [
     path("home-user/user-books-author/", views.user_books_author, name="user_books_author"),
     path("home-user/user-books-type/", views.user_books_type, name="user_books_type"),
     path("home-user/user-borrowed/", views.user_borrowed, name="user_borrowed"),
+    path("home-user/library-rule/", views.library_rule, name="library_rule"),
+    path("home-user/library_card/", views.library_card, name="library_card"),
+    path("home-user/notify/", views.notify, name="notify"),
 ]
 
 
