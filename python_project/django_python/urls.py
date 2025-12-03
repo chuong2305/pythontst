@@ -36,6 +36,9 @@ urlpatterns = [
     path("home-user/user-books-author/", views.user_books_author, name="user_books_author"),
     path("home-user/user-books-type/", views.user_books_type, name="user_books_type"),
     path("home-user/user-borrowed/", views.user_borrowed, name="user_borrowed"),
+    path("home-user/library-rule/", views.library_rule, name="library_rule"),
+    path("home-user/library_card/", views.library_card, name="library_card"),
+    path("home-user/notify/", views.notify, name="notify"),
 ]
 
 

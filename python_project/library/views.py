@@ -35,6 +35,15 @@ def user_books_type(request):
 def user_borrowed(request):
     return render(request, 'user-borrowed.html')
 
+def library_rule(request):
+    return render(request, 'library-rule.html')
+
+def library_card(request):
+    return render(request, 'library_card.html')
+
+def notify(request):
+    return render(request, 'notify.html')
+
 @require_http_methods(["GET", "POST"])
 def custom_login(request):
     if request.method == 'POST':

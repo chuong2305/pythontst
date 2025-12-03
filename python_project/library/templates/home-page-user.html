@@ -20,11 +20,13 @@
             <ul>
                 <li><a href="{% url 'user_books_author' %}" class="menu-item active"><i class="fas fa-book"></i> <span>Danh sách sách / tác giả</span></a>
                 </li>
-                <li><a href="{% url 'user_books_type' %}" class="menu-item"><i class="fas fa-tags"></i> <span>Danh sách thể loại</span></a>
-                </li>
                 <li><a href="{% url 'user_borrowed' %}" class="menu-item"><i class="fas fa-hand-holding"></i> <span>Sách đang mượn</span></a>
                 </li>
-                <li><a href="user-settings.html" class="menu-item"><i class="fas fa-cog"></i> <span>Cài đặt</span></a>
+                <li><a href="{% url 'notify' %}" class="menu-item"><i class="fa-solid fa-bell"></i> <span>Thông báo</span></a>
+                </li>
+                <li><a href="{% url 'library_card' %}" class="menu-item"><i class="fa-regular fa-id-card"></i> <span>Thẻ thư viện</span></a>
+                </li> 
+                <li><a href="{% url 'library_rule' %}" class="menu-item"><i class="fa-solid fa-book"></i> <span>Nội quy thư viện</span></a>
                 </li>
             </ul>
         </nav>
