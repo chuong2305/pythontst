@@ -23,14 +23,19 @@
             <li>
               <a href="{% url 'admin_book_author' %}" class="menu-item active"
                 ><i class="fas fa-book"></i>
-                <span>Quản lý sách / nhà xuất bản</span></a
+                <span>Quản lý sách</span></a
               >
             </li>
-
+            <li>
+              <a href="{% url 'admin_user_check' %}" class="menu-item"
+                ><i class="fa-solid fa-user"></i>
+                <span>Quản lý người dùng</span></a
+              >
+            </li>
             <li>
               <a href="{% url 'admin_borrow' %}" class="menu-item"
                 ><i class="fas fa-exchange-alt"></i>
-                <span>Quản lý mượn / trả sách</span></a
+                <span>Tạo đơn mượn</span></a
               >
             </li>
             <li>
@@ -39,8 +44,8 @@
               >
             </li>
             <li>
-              <a href="admin-users.html" class="menu-item"
-                ><i class="fas fa-users"></i> Quản trị</a
+              <a href="{% url 'admin_add_book' %}" class="menu-item"
+                ><i class="fa-solid fa-book-medical"></i> Thêm sách</a
               >
             </li>
             <li>
