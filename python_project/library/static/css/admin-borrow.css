@@ -1,105 +1,305 @@
-.borrow-wrapper {
-    padding: 20px;
-    font-family: Arial;
+/* ===== Reset & Base ===== */
+* {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
-.search-panel {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.search-panel input {
-    flex: 1;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-.search-panel button {
-    padding: 10px 16px;
-    border: none;
-    background: #007bff;
-    color: #fff;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.tab {
-    padding: 10px 20px;
-    border: none;
-    background: #eee;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.tab.active {
-    background: #007bff;
-    color: white;
-}
-
-.tab-content {
-    display: none;
-}
-
-.section-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-}
-
-.card {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.book-item, .borrowed-item {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.add-btn, .remove-btn, .confirm-btn, .return-btn {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.add-btn { background: #28a745; color: white; }
-.remove-btn { background: #dc3545; color: white; }
-.confirm-btn { background: #007bff; color: white; width: 100%; margin-top: 10px; }
-.return-btn { background: #17a2b8; color: white; }
-
-.borrow-list li {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    border-bottom: 1px solid #ddd;
-}
-
-.late {
-    color: red;
-    font-weight: bold;
-}
-
-table {
+/* ===== Page Container ===== */
+.page-container {
+    padding: 20px;
     width: 100%;
-    border-collapse: collapse;
 }
 
-table th, table td {
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
+/* ===== TWO COLUMN LAYOUT - FIXED ===== */
+.borrow-layout {
+    display: flex ! important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 30px;
+    width: 100%;
+    align-items: flex-start;
+}
+
+.borrow-layout > .ticket-card {
+    flex: 1 1 50% !important;
+    max-width: 50%;
+    min-width: 0;
+    display: block !important;
+}
+
+.borrow-layout > .search-card {
+    flex: 1 1 50% !important;
+    max-width: 50%;
+    min-width: 0;
+    display: block !important;
+}
+
+/* ===== Card Style ===== */
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+/* ===== Section Title ===== */
+.section-title {
+    font-size: 1.4rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+/* ===== Form Labels ===== */
+.ticket-card label {
+    display: block;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+    margin-top: 14px;
+    font-size: 0.95rem;
+}
+
+.ticket-card label:first-of-type {
+    margin-top: 0;
+}
+
+/* ===== Form Inputs ===== */
+.ticket-card input[type="text"],
+.ticket-card input[type="date"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fafafa;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ticket-card input[type="text"]:focus,
+.ticket-card input[type="date"]:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0. 2);
+    background: #fff;
+}
+
+.ticket-card input[type="text"]::placeholder {
+    color: #aaa;
+}
+
+/* ===== Borrow Info Title ===== */
+.borrow-info-title {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    color: #34495e;
+    font-weight: 600;
+}
+
+/* ===== Borrow List ===== */
+.borrow-list-ul {
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f9f9f9;
+    min-height: 80px;
+    margin-bottom: 16px;
+}
+
+.borrow-list-ul:empty::before {
+    content: 'Chưa có sách nào được thêm... ';
+    color: #999;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.borrow-list-ul li {
+    padding: 10px 14px;
+    background: #fff;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    animation: slideIn 0.3s ease;
+}
+
+.borrow-list-ul li:last-child {
+    margin-bottom: 0;
+}
+
+/* ===== Confirm Button ===== */
+.confirm-btn {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0. 3s ease;
+    width: 100%;
+}
+
+.confirm-btn:hover {
+    background: linear-gradient(135deg, #219a52 0%, #27ae60 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+}
+
+/* ===== Search Box ===== */
+.search-box {
+    display: flex ! important;
+    flex-direction: row !important;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fafafa;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    background: #fff;
+}
+
+/* ===== Search Button ===== */
+.search-btn {
+    background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0. 3s ease;
+}
+
+.search-btn:hover {
+    background: linear-gradient(135deg, #2471a3 0%, #2980b9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0. 4);
+}
+
+/* ===== Search Results ===== */
+.search-result {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.search-result > p {
+    color: #888;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* ===== Book Card ===== */
+.book-card {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 14px;
+    border-left: 4px solid #3498db;
+}
+
+.book-card p {
+    margin: 8px 0;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.book-card p strong {
+    color: #2c3e50;
+    display: inline-block;
+    min-width: 70px;
+}
+
+/* ===== Add Button ===== */
+.add-btn {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0. 3s ease;
+}
+
+.add-btn:hover {
+    background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+}
+
+/* ===== Scrollbar ===== */
+.borrow-list-ul::-webkit-scrollbar,
+.search-result::-webkit-scrollbar {
+    width: 6px;
+}
+
+.borrow-list-ul::-webkit-scrollbar-track,
+.search-result::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.borrow-list-ul::-webkit-scrollbar-thumb,
+.search-result::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+/* ===== Animation ===== */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    main.borrow-layout {
+        flex-direction: column ! important;
+    }
+
+    main.borrow-layout > .ticket-card,
+    main.borrow-layout > .search-card {
+        flex: none !important;
+        max-width: 100% !important;
+        width: 100% ! important;
+    }
+
+    .search-box {
+        flex-direction: column !important;
+    }
+
+    .search-btn {
+        width: 100%;
+    }
 }

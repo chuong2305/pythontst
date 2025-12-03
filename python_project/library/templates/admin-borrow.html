@@ -4,150 +4,92 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản lý mượn trả</title>
-    <link rel="stylesheet" href="{% static 'css/admin-borrow.css' %}" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <title>Tạo phiếu mượn — Admin Borrow</title>
+    <link rel="stylesheet" href="{% static 'css/admin-borrow.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5. 0/css/all.min.css">
 </head>
+
 <body>
-    <div class="borrow-wrapper">
+<div class="page-container">
+    <!-- Main two-column layout -->
+    <main class="borrow-layout">
 
-        <!-- Search Panel -->
-        <div class="search-panel">
-            <input type="text" placeholder="Tìm người dùng hoặc sách..." />
-            <button><i class="fas fa-search"></i> Tìm</button>
+        <!-- LEFT SIDE – Borrow Ticket -->
+        <div class="ticket-card card">
+            <h2 class="section-title">Thông tin phiếu mượn</h2>
+
+            <label for="user-id">User ID:</label>
+            <input id="user-id" type="text" placeholder="Nhập User ID..." />
+
+            <label for="borrow-date">Ngày mượn:</label>
+            <input id="borrow-date" type="date" value="{{ today_date }}" />
+
+            <label for="return-date">Ngày trả dự kiến:</label>
+            <input id="return-date" type="date" />
+
+            <h3 class="borrow-info-title">Thông tin mượn</h3>
+            <ul class="borrow-list-ul">
+                <!-- Filled by JS when admin adds books -->
+            </ul>
+
+            <button class="confirm-btn">Xác nhận tạo phiếu</button>
         </div>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" data-tab="borrow">Mượn sách</button>
-            <button class="tab" data-tab="return">Trả sách</button>
-        </div>
+        <!-- RIGHT SIDE – Book Search -->
+        <div class="search-card card">
+            <h2 class="section-title">Tìm sách</h2>
 
-        <!-- Borrow Section -->
-        <div class="tab-content" id="borrow" style="display: block;">
-            <div class="section-grid">
+            <div class="search-box">
+                <input id="book-search" type="text" placeholder="Nhập Book ID hoặc tên sách..." />
+                <button id="btn-search" class="search-btn">
+                    <i class="fas fa-search"></i> Tìm
+                </button>
+            </div>
 
-                <!-- User Info -->
-                <div class="card">
-                    <h3>Thông tin người dùng</h3>
-                    <div class="user-info">
-                        <p><strong>Tên:</strong> Nguyễn Văn A</p>
-                        <p><strong>Email:</strong> example@gmail.com</p>
-                        <p><strong>Số sách đang mượn:</strong> 2 / 5</p>
-                    </div>
-                </div>
-
-                <!-- Book Search Result -->
-                <div class="card">
-                    <h3>Sách khả dụng</h3>
-                    <div class="book-item">
-                        <div>
-                            <p><strong>Đắc Nhân Tâm</strong></p>
-                            <p>Tác giả: Dale Carnegie</p>
-                            <p>Còn lại: 3</p>
-                        </div>
-                        <button class="add-btn">Thêm</button>
-                    </div>
-                </div>
-
-                <!-- Borrow Cart -->
-                <div class="card">
-                    <h3>Giỏ mượn</h3>
-                    <ul class="borrow-list">
-                        <li>
-                            Đắc Nhân Tâm
-                            <button class="remove-btn">X</button>
-                        </li>
-                    </ul>
-                    <label>Ngày mượn:</label>
-                    <input type="date" />
-                    <label>Ngày trả dự kiến:</label>
-                    <input type="date" />
-                    <button class="confirm-btn">Xác nhận mượn</button>
-                </div>
+            <div id="search-result" class="search-result">
             </div>
         </div>
+    </main>
+</div>
 
-        <!-- Return Section -->
-        <div class="tab-content" id="return">
-            <div class="section-grid">
+<script>
+// Example: client-side glue for Add button (keeps previous behavior)
+document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("add-btn")) {
+        const list = document.querySelector(".borrow-list-ul");
+        const id = e.target.dataset.bookid;
+        const title = e.target.dataset.title;
 
-                <div class="card">
-                    <h3>Sách đang mượn</h3>
-                    <div class="borrowed-item">
-                        <p><strong>Harry Potter</strong></p>
-                        <p>Ngày mượn: 12/10/2024</p>
-                        <p class="late">Trễ hạn: 3 ngày</p>
-                        <button class="return-btn">Trả sách</button>
-                    </div>
-                </div>
+        const li = document.createElement("li");
+        li.textContent = id + " – " + title;
+        list.appendChild(li);
+    }
+});
 
-                <div class="card">
-                    <h3>Lịch sử mượn trả</h3>
-                    <table>
-                        <tr>
-                            <th>Sách</th>
-                            <th>Ngày mượn</th>
-                            <th>Ngày trả</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                        <tr>
-                            <td>Đắc Nhân Tâm</td>
-                            <td>01/05/2024</td>
-                            <td>15/05/2024</td>
-                            <td>Đã trả</td>
-                        </tr>
-                    </table>
-                </div>
+// (Optional) simple demo search: replace with real AJAX in backend
+document.getElementById('btn-search').addEventListener('click', () => {
+    const q = document.getElementById('book-search').value.trim();
+    const result = document.getElementById('search-result');
+    result.innerHTML = '';
 
-            </div>
-        </div>
-    </div>
-    <script>
-    // Tab switching
-    const tabs = document.querySelectorAll('.tab');
-    const contents = document.querySelectorAll('.tab-content');
+    if (!q) {
+        result.innerHTML = '<p>Nhập ID hoặc tên sách để tìm.</p>';
+        return;
+    }
 
+    // Demo fake result (replace with real fetch)
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.innerHTML = `
+        <p><strong>ID:</strong> 3421</p>
+        <p><strong>Tựa:</strong> Đắc Nhân Tâm</p>
+        <p><strong>Tác giả:</strong> Dale Carnegie</p>
+        <p><strong>Còn lại:</strong> 3</p>
+        <button class="add-btn" data-bookid="3421" data-title="Đắc Nhân Tâm">Thêm vào phiếu</button>
+    `;
+    result.appendChild(card);
+});
+</script>
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-
-
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-
-
-            contents.forEach(c => c.style.display = 'none');
-            document.getElementById(tab.dataset.tab).style.display = 'block';
-        });
-    });
-
-
-    // Add book to borrow list
-    document.querySelectorAll('.add-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const list = document.querySelector('.borrow-list');
-            const li = document.createElement('li');
-            li.innerHTML = 'Sách mới <button class="remove-btn">X</button>';
-            list.appendChild(li);
-        });
-    });
-
-
-    // Remove book from borrow list
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-btn')) {
-            e.target.parentElement.remove();
-        }
-    });
-
-
-    // Return book
-    document.querySelectorAll('.return-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            alert('Đã trả sách thành công!');
-        });
-    });
-    </script>
 </body>
 </html>

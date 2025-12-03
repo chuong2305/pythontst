@@ -21,15 +21,18 @@ from library import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.login_view, name='login_view'),
-    path('home/', views.home, name='home'),
-    path('home-user/', views.home_page_user, name='home_page_user'),
     path('login/', views.custom_login, name='login'),
-    path('login-view/', views.login_view, name='login_view'),
+    path('', views.login_view, name='login_view'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+
+    path('home/', views.home, name='home'),
     path('home/book-author/', views.admin_book_author, name='admin_book_author'),
     path('home/borrow/', views.admin_borrow, name='admin_borrow'),
     path("home/welcome/", views.welcome_view, name="welcome_view"),
+    path("home/add-book/", views.admin_add_book, name="admin_add_book"),
+    path("home/user-check/", views.admin_user_check, name="admin_user_check"),
+    
+    path('home-user/', views.home_page_user, name='home_page_user'),
     path("home-user/user-books-author/", views.user_books_author, name="user_books_author"),
     path("home-user/user-books-type/", views.user_books_type, name="user_books_type"),
     path("home-user/user-borrowed/", views.user_borrowed, name="user_borrowed"),

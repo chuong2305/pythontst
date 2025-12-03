@@ -14,8 +14,14 @@ def login_view(request):
 def admin_book_author(request):
     return render(request, 'admin-book-author.html')
 
+def admin_user_check(request):
+    return render(request, 'admin-user-check.html')
+
 def admin_borrow(request):
     return render(request, 'admin-borrow.html')
+
+def admin_add_book(request):
+    return render(request, 'admin-add-book.html')
 
 def welcome_view(request):
     return render(request, 'welcome.html')
