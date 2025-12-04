@@ -57,4 +57,53 @@
 .borrow-btn:disabled {
    background-color: #00618F;
 }
+.borrow-wrapper {
+    padding: 20px;
+    font-family: Arial;
+    box-sizing: border-box;
+}
 
+.search-panel {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-panel input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.search-panel button {
+    padding: 10px 16px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab {
+    padding: 10px 20px;
+    border: none;
+    background: #eee;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.tab.active {
+    background: #007bff;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
