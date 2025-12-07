@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -68,6 +69,35 @@ TEMPLATES = [
     },
 ]
 
+JAZZMIN_SETTINGS = {
+    "site_title": "Education Library Admin",
+    "site_header": "Education Library",
+    "site_brand": "Education Library",
+    "welcome_sign": "Chào mừng đến trang quản trị Education Library",
+    "copyright": "",
+    "hide_apps": ["auth"],
+
+    
+
+    # MENU BÊN TRÁI TÙY CHỈNH ĐÚNG CÚ PHÁP
+    "side_menu_items": [
+        
+        {
+            "app": "library",
+            "label": "Quản lý thư viện",
+            "models": [
+                {"model": "library.Book", "name": "Sách"},
+                {"model": "library.Author", "name": "Tác giả"},
+                {"model": "library.Category", "name": "Danh mục"},
+                {"model": "library.Publisher", "name": "Nhà xuất bản"},
+                {"model": "library.Borrow", "name": "Mượn trả"},
+                {"model": "library.Account", "name": "Tài khoản người dùng"},
+            ]
+        }
+    ],
+
+    "navigation_expanded": True,
+}
 
 WSGI_APPLICATION = 'django_python.wsgi.application'
 
