@@ -10,81 +10,115 @@
 
 <div class="book-page-container">
 
-    <!-- TOP: SEARCH SECTION -->
+    <!-- TOP: SEARCH SECTION (để sau xử lý) -->
     <div class="top-section">
         <h2 class="section-title">Tìm kiếm sách</h2>
-        <div class="search-row">
-            <input type="text" class="search-input" placeholder="Nhập tên sách, mã sách, từ khoá..." />
-            <button class="btn-search">Tìm kiếm</button>
-        </div>
+        <form method="get" class="search-row">
+            <input type="text" name="keyword" class="search-input"
+                   placeholder="Nhập tên sách, mã sách, từ khoá..." value="{{ keyword }}" />
+            <button class="btn-search" type="submit">Tìm kiếm</button>
+        </form>
     </div>
 
-    <!-- MIDDLE: FILTER SECTION -->
+    <!-- MIDDLE: FILTER SECTION (UI sẵn, chưa áp dụng lọc) -->
     <div class="middle-section">
         <div class="filter-group">
             <label>Thể loại</label>
-            <select>
-                <option>Tất cả</option>
+            <select name="category">
+                <option value="">Tất cả</option>
+                {% for c in categories %}
+                  <option value="{{ c.category_id }}"
+                          {% if selected_category == c.category_id|stringformat:"s" %}selected{% endif %}>
+                    {{ c.category_name }}
+                  </option>
+                {% endfor %}
             </select>
         </div>
 
         <div class="filter-group">
             <label>Tác giả</label>
-            <select>
-                <option>Tất cả</option>
+            <select name="author">
+                <option value="">Tất cả</option>
+                {% for a in authors %}
+                  <option value="{{ a.author_id }}"
+                          {% if selected_author == a.author_id|stringformat:"s" %}selected{% endif %}>
+                    {{ a.author_name }}
+                  </option>
+                {% endfor %}
             </select>
         </div>
 
         <div class="filter-group">
             <label>Nhà xuất bản</label>
-            <select>
-                <option>Tất cả</option>
+            <select name="publisher">
+                <option value="">Tất cả</option>
+                {% for p in publishers %}
+                  <option value="{{ p.publish_id }}"
+                          {% if selected_publisher == p.publish_id|stringformat:"s" %}selected{% endif %}>
+                    {{ p.publish_name }}
+                  </option>
+                {% endfor %}
             </select>
         </div>
 
         <div class="filter-group">
             <label>Ngày nhập</label>
-            <input type="date">
+            <input type="date" name="date_add" value="{{ selected_date }}">
         </div>
 
         <div class="filter-group">
             <label>Trạng thái</label>
-            <select>
-                <option>Tất cả</option>
-                <option>Còn trống</option>
-                <option>Đã được mượn</option>
-                <option>Đã được đặt</option>
+            <select name="status">
+                <option value="" {% if not selected_status %}selected{% endif %}>Tất cả</option>
+                <option value="available" {% if selected_status == "available" %}selected{% endif %}>Còn trống</option>
+                <option value="borrowed" {% if selected_status == "borrowed" %}selected{% endif %}>Đã được mượn</option>
             </select>
         </div>
     </div>
 
-    <!-- BOTTOM: BOOK DISPLAY -->
+    <!-- BOTTOM: BOOK DISPLAY (HIỂN THỊ TOÀN BỘ SÁCH) -->
     <div class="bottom-section">
         <h2 class="section-title">Danh sách sách</h2>
 
         <div class="book-display">
-
-            <!-- Example book card -->
-            <div class="book-card">
-                <div class="book-img"></div>
-                <div class="book-info">
-                    <h3 class="book-title">Tên sách mẫu</h3>
-                    <p class="book-author">Tác giả: ABC</p>
-                    <p class="book-status available">Trạng thái: Còn trống</p>
-                </div>
-            </div>
-
-            <div class="book-card">
-                <div class="book-img"></div>
-                <div class="book-info">
-                    <h3 class="book-title">Book XYZ</h3>
-                    <p class="book-author">Tác giả: DEF</p>
-                    <p class="book-status borrowed">Trạng thái: Đã mượn</p>
-                </div>
-            </div>
-
+            {% if books %}
+                {% for b in books %}
+                    <div class="book-card">
+                        <div class="book-img">
+                            <!-- Nếu có ảnh sau này:
+                            <img src="{{ b.image.url }}" alt="{{ b.book_name }}">
+                            -->
+                        </div>
+                        <div class="book-info">
+                            <h3 class="book-title">{{ b.book_name }}</h3>
+                            <p class="book-author">Tác giả: {{ b.author.author_name }}</p>
+                            <p class="book-categories">
+                                Thể loại:
+                                {% with cats=b.categories.all %}
+                                    {% if cats %}
+                                        {% for c in cats %}
+                                            {{ c.category_name }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% endwith %}
+                            </p>
+                            <p class="book-publisher">NXB: {{ b.publisher.publish_name }}</p>
+                            <p class="book-year">Năm XB: {{ b.publishYear|default:"-" }}</p>
+                            <p class="book-date">Ngày nhập: {{ b.dateAdd }}</p>
+                            {% if b.available > 0 %}
+                                <p class="book-status available">Trạng thái: Còn trống ({{ b.available }})</p>
+                            {% else %}
+                                <p class="book-status borrowed">Trạng thái: Đã được mượn</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Không có sách nào trong cơ sở dữ liệu.</p>
+            {% endif %}
         </div>
-
     </div>
 
 </div>

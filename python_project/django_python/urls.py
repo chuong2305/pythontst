@@ -1,22 +1,6 @@
-"""
-URL configuration for mysite project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LogoutView
 from library import views
 
 urlpatterns = [
@@ -24,21 +8,18 @@ urlpatterns = [
     path('login/', views.custom_login, name='login'),
     path('', views.login_view, name='login_view'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
-
-    path('home/', views.home, name='home'),
-    path('home/book-author/', views.admin_book_author, name='admin_book_author'),
-    path('home/borrow/', views.admin_borrow, name='admin_borrow'),
     path("home/welcome/", views.welcome_view, name="welcome_view"),
-    path("home/add-book/", views.admin_add_book, name="admin_add_book"),
-    path("home/user-check/", views.admin_user_check, name="admin_user_check"),
-    
+
     path('home-user/', views.home_page_user, name='home_page_user'),
-    path("home-user/user-books-author/", views.user_books_author, name="user_books_author"),
+
+    # Dùng cùng 1 view để luôn có dữ liệu books
+    path("home-user/user-books-author/", views.user_books_view, name="user_books_author"),
     path("home-user/user-books-type/", views.user_books_type, name="user_books_type"),
     path("home-user/user-borrowed/", views.user_borrowed, name="user_borrowed"),
     path("home-user/library-rule/", views.library_rule, name="library_rule"),
     path("home-user/library_card/", views.library_card, name="library_card"),
     path("home-user/notify/", views.notify, name="notify"),
+
+    # Alias (có thể giữ để test)
+    path('user/books/', views.user_books_view, name="user_books"),
 ]
-
-

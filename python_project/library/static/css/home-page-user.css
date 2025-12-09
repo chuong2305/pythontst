@@ -6,11 +6,14 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f9;
-    color: #333;
-    height: 100vh;
-    overflow: hidden;
+}
+body.home-user-page {
+  height: 100vh;         /* nếu cần full chiều cao */
+  overflow-y: auto;      /* cho phép cuộn dọc */
+  overflow-x: hidden;    /* tránh cuộn ngang toàn trang */
+  background: #f4f6f9;   /* màu nền trang cha */
+  color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Khung tổng */
@@ -84,10 +87,9 @@ body {
 
 /* Main content */
 .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s ease;
+  height: 100vh;          /* hoặc calc(100vh - chiều cao topbar cố định) */
+  overflow-y: auto;       /* cuộn dọc vùng nội dung */
+  overflow-x: hidden;
 }
 
 /* Thanh tiêu đề */
@@ -183,8 +185,9 @@ body {
 }
 /* Nội dung */
 .content-area {
-    flex: 1;
-    padding: 0;
+  height: calc(100vh - 64px);  /* trừ chiều cao topbar nếu topbar ~64px */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .welcome-user{
     margin-left: 300px;
@@ -216,4 +219,9 @@ iframe {
     .topbar {
         font-size: 16px;
     }
+}
+#pageFrame {
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
