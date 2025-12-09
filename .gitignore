@@ -1,0 +1,31 @@
+# Bỏ qua thư mục cấu hình của PyCharm/IntelliJ
+.idea/
+
+# Bỏ qua thư mục cache của Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bỏ qua file log
+*.log
+
+# Bỏ qua file môi trường ảo (virtualenv)
+venv/
+env/
+
+# Bỏ qua file Jupyter Notebook checkpoint
+.ipynb_checkpoints/
+
+# Bỏ qua file hệ điều hành
+.DS_Store
+Thumbs.db
+
+# Bỏ qua các file test coverage
+.coverage
+*.cover
+
+# Bỏ qua các file build/distribution
+build/
+dist/
+*.egg-info/

@@ -87,9 +87,10 @@ body.home-user-page {
 
 /* Main content */
 .main-content {
-  height: 100vh;          /* hoặc calc(100vh - chiều cao topbar cố định) */
-  overflow-y: auto;       /* cuộn dọc vùng nội dung */
-  overflow-x: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Thanh tiêu đề */
@@ -101,6 +102,7 @@ body.home-user-page {
     align-items: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     z-index: 50;
+    flex-shrink: 0;
 }
 
 .page-title {
@@ -185,7 +187,7 @@ body.home-user-page {
 }
 /* Nội dung */
 .content-area {
-  height: calc(100vh - 64px);  /* trừ chiều cao topbar nếu topbar ~64px */
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
 }
