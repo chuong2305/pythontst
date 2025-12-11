@@ -1,17 +1,5 @@
 .RuleGroup{
-    margin-left: 5px;
-     overflow-y: auto;
+     margin-left: 10px;
      max-height: 100%;
      padding: 10px;
-}
-.ruleTiltle{
-    font-size: 25px;
-    font-family: sans-serif;
-    padding-top: 10px;
-    font-weight: bold;
-}
-.ruleInfo{
-   font-size: 20px;
-   font-family: sans-serif;
-   padding: 3px; 
 }

@@ -3,56 +3,166 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}">
     <link rel="stylesheet" href="{% static 'css/library-rule.css' %}">
 </head>
 <body>
 <div class="RuleGroup">
-    <div class="LibaryRule">
-        <div class="ruleTiltle">1. Quy định về thẻ thư viện</div>
-        <div class="ruleInfo">Người đọc phải có thẻ thư viện mới được mượn sách.</div>
-        <div class="ruleInfo">Không cho người khác mượn thẻ.</div>
-        <div class="ruleInfo">Mất thẻ phải báo ngay để tránh khóa tài khoản.</div>
-  </div>
-  <div class="LibaryRule">
-        <div class="ruleTiltle">2. Quy định mượn sách</div>
-        <div class="ruleInfo">Chỉ có thể mượn sách khi trong kho vẫn còn số lượng.</div>
-        <div class="ruleInfo">Mỗi thẻ thư viện chỉ được mượn tối đa 5 quyển cùng lúc.</div>
-        <div class="ruleInfo">Thời hạn mượn là 14 ngày.</div>
-        <div class="ruleInfo">Một số loại sách đặt biệt sẽ không được mượn như tài liệu tham khảo, luận văn v.v.</div>
-  </div>
-  <div class="LibaryRule">
-        <div class="ruleTiltle">3. Quy định trả sách</div>
-        <div class="ruleInfo">Phải trả sách đúng hạn theo thông tin ghi trên hệ thống.</div>
-        <div class="ruleInfo">Sách phải trả đúng tình trạng như lúc mượn.</div>
-        <div class="ruleInfo">Nếu sách hư, hỏng phải báo ngay thủ thư lúc trả.</div>
-        <div class="ruleInfo">Không tự ý sửa hay dán lại sách.</div>
-  </div>
-  <div class="LibaryRule">
-        <div class="ruleTiltle">4. Phí phạt (nếu có)</div>
-        <div class="ruleInfo">Trả sách trễ sẽ phải đóng 3.000đ/ngày với mỗi cuốn.</div>
-        <div class="ruleInfo">Nếu sách bị hư, hỏng so với lúc mượn sẽ phạt như sau:</div>
-        <div class="ruleInfo">-Hư nhẹ: 20% giá sách.</div>
-        <div class="ruleInfo">-Hư nặng: 50% giá sách.</div>
-        <div class="ruleInfo">-Mất sách: 100% giá sách kèm chi phí xử lý.</div>
-        <div class="ruleInfo">Nếu sách hư, hỏng phải báo ngay thủ thư lúc trả.</div>
-        <div class="ruleInfo">Không tự ý sửa hay dán lại sách.</div>
-  </div>
-  <div class="LibaryRule">
-        <div class="ruleTiltle">5. Quy định trong thư viện</div>
-        <div class="ruleInfo">Giữ trật tự, không gây ồn ào.</div>
-        <div class="ruleInfo">Không mang thức ăn, nước uống vào khu vực sách.</div>
-        <div class="ruleInfo">Không tự ý để sai vị trí sách so với lúc mượn.</div>
-        <div class="ruleInfo">Không đánh dấu, viết vẽ lên sách.</div>
-  </div>
-  <div class="LibaryRule">
-        <div class="ruleTiltle">6. Liên hệ hỗ trợ</div>
-        <div class="ruleInfo">Nếu gặp vấn đề mượn-trả sách liên hệ với nhân viên quầy sách.</div>
-        <div class="ruleInfo">Nếu không muốn gặp trực tiếp có thể liên hệ qua: </div>
-        <div class="ruleInfo">-Zalo: 0483928418.</div>
-        <div class="ruleInfo">-Số điện thoại: 0483928418, 0358392391.</div>
-        <div class="ruleInfo">-Email: library_edu@gmail.com.</div>
-  </div>
+    <div class="header-search">
+        <div class="rules-search">
+            <div class="search-wrapper-rules">
+                <span class="material-symbols-outlined search-icon-rules">search</span>
+                <input class="search-input-rules" type="text" placeholder="Tìm kiếm trong nội quy..."/>
+            </div>
+        </div>
+
+        <div class="rules-content">
+            <!-- Section 1 -->
+            <section class="rules-section">
+                <h3 class="rules-section-title">1. Quy định về thẻ thư viện</h3>
+                <div class="rules-items">
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">credit_card</span>
+                        <p class="rules-item-text">Độc giả phải có thẻ thư viện hợp lệ để mượn sách và sử
+                            dụng các dịch vụ khác.</p>
+                    </div>
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">no_accounts</span>
+                        <p class="rules-item-text">Không cho người khác mượn thẻ thư viện. Mỗi độc giả chịu
+                            trách nhiệm với các giao dịch được thực hiện bằng thẻ của mình.</p>
+                    </div>
+                    <div class="rules-item rules-item--warning">
+                        <span class="material-symbols-outlined rules-item-icon">report</span>
+                        <p class="rules-item-text">Trường hợp mất thẻ, độc giả phải báo ngay cho thư viện để
+                            khóa thẻ và làm thủ tục cấp lại.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2 -->
+            <section class="rules-section">
+                <h3 class="rules-section-title">2. Quy định mượn sách</h3>
+                <div class="rules-items">
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">inventory_2</span>
+                        <p class="rules-item-text">Độc giả chỉ được mượn sách khi thư viện còn tài liệu
+                            trong kho.</p>
+                    </div>
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">library_books</span>
+                        <p class="rules-item-text">Số lượng mượn tối đa là 05 cuốn sách trong một lần.</p>
+                    </div>
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">event_available</span>
+                        <p class="rules-item-text">Thời hạn mượn là 14 ngày. Có thể gia hạn nếu không có độc
+                            giả khác đăng ký mượn.</p>
+                    </div>
+                    <div class="rules-item rules-item--danger">
+                        <span class="material-symbols-outlined rules-item-icon">lock</span>
+                        <p class="rules-item-text">Các loại sách đặc biệt (sách hiếm, tài liệu tham
+                            khảo,...) không được phép mượn về.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3 -->
+            <section class="rules-section">
+                <h3 class="rules-section-title">3. Quy định trả sách</h3>
+                <div class="rules-items">
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">assignment_return</span>
+                        <p class="rules-item-text">Độc giả có trách nhiệm trả sách đúng hạn tại quầy thủ
+                            thư.</p>
+                    </div>
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">task_alt</span>
+                        <p class="rules-item-text">Sách khi trả phải ở trong tình trạng nguyên vẹn như lúc
+                            mượn.</p>
+                    </div>
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">report_problem</span>
+                        <p class="rules-item-text">Nếu phát hiện sách bị hư hỏng (rách, bẩn, mất trang)
+                            trước khi mượn, cần báo ngay cho nhân viên thư viện.</p>
+                    </div>
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">build_circle</span>
+                        <p class="rules-item-text">Không tự ý sửa chữa, dán băng keo, hoặc làm thay đổi tình
+                            trạng ban đầu của sách.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4 -->
+            <section class="rules-section">
+                <h3 class="rules-section-title">4. Phí phạt</h3>
+                <div class="rules-items">
+                    <div class="rules-item rules-item--warning">
+                        <span class="material-symbols-outlined rules-item-icon">event_busy</span>
+                        <p class="rules-item-text">Trả sách trễ hạn sẽ bị phạt theo quy định của thư viện
+                            cho mỗi ngày quá hạn.</p>
+                    </div>
+                    <div class="rules-item rules-item--danger">
+                        <span class="material-symbols-outlined rules-item-icon">heart_broken</span>
+                        <p class="rules-item-text">Trường hợp làm mất, hư hỏng hoặc rách sách, độc giả phải
+                            bồi thường theo giá trị của sách hoặc thay thế bằng một cuốn sách tương tự.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5 -->
+            <section class="rules-section">
+                <h3 class="rules-section-title">5. Quy định trong thư viện</h3>
+                <div class="rules-items">
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">quiet_time</span>
+                        <p class="rules-item-text">Giữ trật tự, im lặng, đi nhẹ, nói khẽ để không làm ảnh
+                            hưởng đến người khác.</p>
+                    </div>
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">no_food</span>
+                        <p class="rules-item-text">Không mang đồ ăn, thức uống vào khu vực đọc sách.</p>
+                    </div>
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">wrong_location</span>
+                        <p class="rules-item-text">Không tự ý xếp sách lên kệ. Sách sau khi đọc xong vui
+                            lòng để tại xe đẩy hoặc nơi quy định.</p>
+                    </div>
+                    <div class="rules-item">
+                        <span class="material-symbols-outlined rules-item-icon">edit_off</span>
+                        <p class="rules-item-text">Không viết, vẽ, gạch dưới hoặc làm hỏng tài liệu và tài
+                            sản của thư viện.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 6 -->
+            <section class="rules-section">
+                <h3 class="rules-section-title">6. Liên hệ hỗ trợ</h3>
+                <div class="rules-items">
+                    <div class="rules-item rules-item--info">
+                        <span class="material-symbols-outlined rules-item-icon">support_agent</span>
+                        <p class="rules-item-text">Mọi thắc mắc hoặc cần hỗ trợ, vui lòng liên hệ nhân viên
+                            tại quầy, hoặc qua các kênh sau:</p>
+                    </div>
+                </div>
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <span class="material-symbols-outlined contact-icon">chat</span>
+                        <span class="contact-text">Zalo: 090 xxx xxxx</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="material-symbols-outlined contact-icon">call</span>
+                        <span class="contact-text">Điện thoại: (028) xxxx xxxx</span>
+                    </div>
+                    <div class="contact-item contact-item--full">
+                        <span class="material-symbols-outlined contact-icon">mail</span>
+                        <span class="contact-text">Email: support@library.com</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 </div>
 </body>
 </html>
