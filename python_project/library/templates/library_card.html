@@ -3,13 +3,12 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}">
-    <link rel="stylesheet" href="{% static 'css/library-card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/library-card.css' %}?v={{ timestamp }}">
 </head>
 <body>
 <div class="library-card">
     <div class="card-header">
-        <img src="https://static.vecteezy.com/system/resources/thumbnails/051/458/534/small/profile-icon-user-profile-username-icon-free-vector.jpg" class="avatar">
+        <img src="{% static 'img/avatar.jpg' %}" class="avatar">
         <div class="card-title">Thẻ Thư Viện</div>
     </div>
     <div class="card-info">

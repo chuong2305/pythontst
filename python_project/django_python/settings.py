@@ -64,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django_python.context_processors.add_timestamp',
             ],
         },
     },
@@ -150,8 +151,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'library/static'
+    BASE_DIR / "static",
+    BASE_DIR / "django_python" / "library" / "static",
 ]
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -160,3 +164,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
 X_FRAME_OPTIONS = 'ALLOWALL'
+

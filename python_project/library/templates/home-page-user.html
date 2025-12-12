@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang người dùng - Thư viện</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}?v={{ timestamp }}">
 </head>
 <body class="home-user-page">
 <div class="wrapper">
@@ -14,6 +15,7 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
+            <span class="material-symbols-outlined header-brand-icon">local_library</span>
             <h2>Thư viện</h2>
         </div>
         <nav class="nav-menu">
@@ -24,9 +26,13 @@
                 </li>
                 <li><a href="{% url 'notify' %}" class="menu-item"><i class="fa-solid fa-bell"></i> <span>Thông báo</span></a>
                 </li>
+                <li><a href="{% url 'borrowed_history' %}" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Lịch sử mượn trả</span></a>
+                </li>
                 <li><a href="{% url 'library_card' %}" class="menu-item"><i class="fa-regular fa-id-card"></i> <span>Thẻ thư viện</span></a>
                 </li> 
                 <li><a href="{% url 'library_rule' %}" class="menu-item"><i class="fa-solid fa-book"></i> <span>Nội quy thư viện</span></a>
+                </li>
+                <li><a href="{% url 'user_account' %}" class="menu-item"><i class="fa-solid fa-id-card"></i> <span>Tài khoản cá nhân</span></a>
                 </li>
             </ul>
         </nav>
@@ -40,16 +46,15 @@
 
 <div class="user-wrapper">
             <div class="user-info">
-              <i class="fas fa-user-circle"></i>
-              <span>User</span>
-              <i
-                class="fas fa-chevron-down"
-                style="font-size: 12px; margin-left: 5px"
-              ></i>
+                <div class="avatar">
+                    <img src="{% static 'img/avatar.jpg' %}" alt="User Logo">
+                </div>
+                <span>Chuong</span>
             </div>
+
             <ul class="header__user-dropdown">
               <li>
-                <a href="user-infor.html"
+                <a href="{% url 'user_account' %}" id="profileBtn"
                   ><i class="fas fa-id-card"></i> Hồ Sơ</a
                 >
               </li>
@@ -90,6 +95,31 @@
                 menuItems[j].classList.remove('active');
             }
             this.classList.add('active');
+        };
+    }
+
+    // Xử lý nút Hồ Sơ trong dropdown
+    var profileBtn = document.getElementById('profileBtn');
+    if (profileBtn) {
+        profileBtn.onclick = function (event) {
+            event.preventDefault();
+
+            // Đổi src iframe
+            document.getElementById('pageFrame').src = this.getAttribute('href');
+
+            // Cập nhật tiêu đề trang
+            document.getElementById('pageTitle').textContent = 'Tài khoản cá nhân';
+
+            // Cập nhật trạng thái active của menu item
+            for (var j = 0; j < menuItems.length; j++) {
+                menuItems[j].classList.remove('active');
+            }
+            // Tìm và active menu item "Tài khoản cá nhân"
+            for (var j = 0; j < menuItems.length; j++) {
+                if (menuItems[j].getAttribute('href') === "{% url 'user_account' %}") {
+                    menuItems[j].classList.add('active');
+                }
+            }
         };
     }
 </script>

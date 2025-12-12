@@ -1,5 +1,9 @@
+* {
+    font-family: "Inter", sans-serif;
+}
+
 .book-card {
-    width: 900px;
+    width: auto;
     max-width: 100%;
     border: 2px;
     padding: 15px;
@@ -58,8 +62,8 @@
    background-color: #00618F;
 }
 .borrow-wrapper {
-    padding: 20px;
-    font-family: Arial;
+    padding: 30px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     box-sizing: border-box;
 }
 
