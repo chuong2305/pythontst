@@ -22,6 +22,8 @@ def user_books_type(request):
 
 def user_borrowed(request):
     return render(request, 'user-borrowed.html')
+def borrowed_history(request):
+    return render(request, 'borrowed-history.html')
 
 def library_rule(request):
     return render(request, 'library-rule.html')

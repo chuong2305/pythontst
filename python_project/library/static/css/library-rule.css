@@ -1,5 +1,267 @@
-.RuleGroup{
-     margin-left: 10px;
-     max-height: 100%;
-     padding: 10px;
+
+* {
+    box-sizing: border-box; /* Đặt box-sizing cho tất cả phần tử để bao gồm padding và border trong width/height */
+}
+
+body {
+    background-color: #f3f4f6; /* Màu nền xám nhạt cho toàn bộ trang */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif; /* Font chữ chính, ưu tiên Inter, sau đó fallback */
+    margin: 0; /* Loại bỏ margin mặc định của body */
+    line-height: 1.5; /* Chiều cao dòng chữ để dễ đọc */
+    color: #111827; /* Màu chữ đen chính */
+}
+
+/* =========================================
+   LAYOUT CHÍNH
+   ========================================= */
+.RuleGroup {
+    margin-left: 10px; /* Khoảng cách bên trái để căn chỉnh layout */
+    max-height: 100%; /* Chiều cao tối đa bằng container cha */
+    padding: 10px; /* Khoảng đệm bên trong */
+    min-height: 100vh; /* Chiều cao tối thiểu bằng viewport để lấp đầy màn hình */
+}
+
+/* =========================================
+   SEARCH BAR
+   ========================================= */
+/* Header chứa thanh search (Sticky) */
+.header-search {
+    position: sticky; /* Giữ header dính ở trên cùng khi cuộn */
+    top: 0; /* Vị trí dính ở đỉnh */
+    z-index: 40; /* Độ ưu tiên hiển thị cao */
+    background-color: #f3f4f6; /* Nền trùng với body */
+    margin-bottom: 2rem; /* Khoảng cách dưới */
+}
+
+html.dark .header-search {
+    background-color: #111827; /* Nền tối cho chế độ dark */
+}
+
+/* Khung nền mờ của thanh search */
+.rules-search {
+    background-color: rgba(255, 255, 255, 0.85); /* Nền trắng mờ */
+    backdrop-filter: blur(8px); /* Hiệu ứng mờ nền phía sau */
+    border-radius: 0.75rem; /* Bo góc */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Bóng đổ nhẹ */
+}
+
+html.dark .rules-search {
+    background-color: rgba(31, 41, 55, 0.85); /* Nền tối mờ cho dark mode */
+}
+
+/* Ô input bao quanh */
+.search-wrapper-rules {
+    position: relative; /* Để định vị icon bên trong */
+    display: flex; /* Sử dụng flexbox để căn chỉnh */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    width: 100%; /* Chiều rộng đầy đủ */
+    height: 3.5rem; /* Chiều cao cố định */
+    background-color: #ffffff; /* Nền trắng */
+    border: 1px solid #e5e7eb; /* Viền xám nhạt */
+    border-radius: 0.5rem; /* Bo góc */
+    padding: 0 1rem; /* Khoảng đệm ngang */
+    transition: border-color 0.2s, box-shadow 0.2s; /* Hiệu ứng chuyển đổi mượt mà */
+    margin-bottom: 20px; /* Khoảng cách dưới */
+}
+
+/* Hiệu ứng focus vào ô tìm kiếm */
+.search-wrapper-rules:focus-within {
+    border-color: #2563eb; /* Viền xanh khi focus */
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); /* Bóng xanh nhẹ */
+}
+
+.search-icon-rules {
+    position: absolute; /* Định vị tuyệt đối */
+    left: 1rem; /* Cách lề trái */
+    color: #6b7280; /* Màu xám cho icon */
+    font-size: 1.5rem; /* Kích thước icon */
+}
+
+.search-input-rules {
+    flex: 1; /* Chiếm không gian còn lại */
+    width: 100%; /* Chiều rộng đầy đủ */
+    background: transparent; /* Nền trong suốt */
+    border: none; /* Không viền */
+    outline: none; /* Loại bỏ outline mặc định */
+    margin-left: 2.5rem; /* Khoảng cách từ icon */
+    color: #111827; /* Màu chữ */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif; /* Font giống body */
+    font-size: 1rem; /* Kích thước chữ */
+}
+
+html.dark .search-input-rules {
+    color: #f9fafb; /* Màu chữ sáng cho dark mode */
+}
+
+.search-input-rules::placeholder {
+    color: #6b7280; /* Màu placeholder */
+    opacity: 0.7; /* Độ trong suốt */
+}
+
+/* =========================================
+   CONTENT SECTIONS
+   ========================================= */
+.rules-content {
+    display: flex; /* Sử dụng flexbox */
+    flex-direction: column; /* Hướng dọc */
+    gap: 1rem; /* Khoảng cách giữa các item */
+    padding-bottom: 3rem; /* Khoảng đệm dưới */
+}
+
+.rules-section {
+    display: flex; /* Flexbox */
+    flex-direction: column; /* Hướng dọc */
+    gap: 1.25rem; /* Khoảng cách */
+    scroll-margin-top: 6rem; /* Khoảng cách khi cuộn đến */
+}
+
+.rules-section-title {
+    font-size: 1.5rem; /* Kích thước chữ lớn */
+    font-weight: 700; /* Chữ đậm */
+    color: #111827; /* Màu chữ */
+    margin: 0; /* Loại bỏ margin */
+    padding-left: 1rem; /* Khoảng đệm trái */
+    border-left: 5px solid #2563eb; /* Viền trái xanh */
+    line-height: 1.2; /* Chiều cao dòng */
+}
+
+/* =========================================
+   RULES ITEMS
+   ========================================= */
+.rules-items {
+    display: grid; /* Grid layout */
+    grid-template-columns: 1fr; /* Một cột */
+    gap: 1rem; /* Khoảng cách */
+}
+
+/* Item mặc định */
+.rules-item {
+    display: flex; /* Flexbox */
+    align-items: flex-start; /* Căn đầu */
+    gap: 1rem; /* Khoảng cách */
+    padding: 1.25rem; /* Khoảng đệm */
+    background-color: #ffffff; /* Nền trắng */
+    border: 1px solid #e5e7eb; /* Viền xám */
+    border-radius: 0.75rem; /* Bo góc */
+    transition: all 0.2s ease; /* Hiệu ứng chuyển đổi */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Bóng nhẹ */
+}
+
+.rules-item:hover {
+    transform: translateY(-2px); /* Nâng lên khi hover */
+    border-color: #2563eb; /* Viền xanh */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Bóng lớn hơn */
+}
+
+.rules-item-icon {
+    flex-shrink: 0; /* Không co lại */
+    font-size: 1.75rem; /* Kích thước icon */
+    margin-top: 0.1rem; /* Khoảng cách trên */
+    color: #2563eb; /* Màu xanh */
+}
+
+.rules-item-text {
+    flex: 1; /* Chiếm không gian */
+    color: #111827; /* Màu chữ */
+    font-size: 1rem; /* Kích thước chữ */
+    line-height: 1.6; /* Chiều cao dòng */
+    margin: 0; /* Loại bỏ margin */
+}
+
+/* --- WARNING ITEM (Vàng) --- */
+.rules-item--warning {
+    background-color: #fffbeb; /* Nền vàng nhạt */
+    border-color: #fcd34d; /* Viền vàng */
+}
+
+.rules-item--warning .rules-item-icon {
+    color: #d97706; /* Icon vàng đậm */
+}
+
+.rules-item--warning .rules-item-text {
+    color: #92400e; /* Chữ nâu */
+    font-weight: 500; /* Chữ trung bình đậm */
+}
+
+/* --- DANGER ITEM (Đỏ) --- */
+.rules-item--danger {
+    background-color: #fef2f2; /* Nền đỏ nhạt */
+    border-color: #fca5a5; /* Viền đỏ */
+}
+
+.rules-item--danger .rules-item-icon {
+    color: #dc2626; /* Icon đỏ */
+}
+
+.rules-item--danger .rules-item-text {
+    color: #991b1b; /* Chữ đỏ đậm */
+    font-weight: 500; /* Chữ trung bình đậm */
+}
+
+/* --- INFO ITEM (Xanh) --- */
+.rules-item--info {
+    background-color: #eff6ff; /* Nền xanh nhạt */
+    border-color: #93c5fd; /* Viền xanh */
+}
+
+.rules-item--info .rules-item-icon {
+    color: #2563eb; /* Icon xanh (giống mặc định) */
+}
+
+.rules-item--info .rules-item-text {
+    color: #1e40af; /* Chữ xanh đậm */
+    font-weight: 500; /* Chữ trung bình đậm */
+}
+
+/* =========================================
+   CONTACT GRID
+   ========================================= */
+.contact-grid {
+    display: grid; /* Grid layout */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Cột tự động, tối thiểu 280px */
+    gap: 1rem; /* Khoảng cách */
+    margin-top: 1rem; /* Khoảng cách trên */
+}
+
+.contact-item {
+    display: flex; /* Flexbox */
+    align-items: center; /* Căn giữa */
+    gap: 1rem; /* Khoảng cách */
+    padding: 1rem; /* Khoảng đệm */
+    background-color: #ffffff; /* Nền trắng */
+    border: 1px solid #e5e7eb; /* Viền xám */
+    border-radius: 0.5rem; /* Bo góc */
+    transition: border-color 0.2s; /* Hiệu ứng viền */
+}
+
+.contact-item:hover {
+    border-color: #2563eb; /* Viền xanh khi hover */
+}
+
+.contact-item--full {
+    grid-column: 1 / -1; /* Chiếm toàn bộ hàng */
+}
+
+.contact-icon {
+    flex-shrink: 0; /* Không co lại */
+    color: #2563eb; /* Màu xanh */
+    font-size: 1.5rem; /* Kích thước */
+    padding: 0.5rem; /* Khoảng đệm */
+    background-color: rgba(37, 99, 235, 0.1); /* Nền xanh nhạt */
+    border-radius: 50%; /* Bo tròn */
+}
+
+.contact-text {
+    color: #111827; /* Màu chữ */
+    font-size: 1rem; /* Kích thước */
+    font-weight: 500; /* Chữ trung bình đậm */
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+   ========================================= */
+@media (max-width: 768px) {
+    .RuleGroup {
+        padding: 0 1rem; /* Khoảng đệm ngang cho mobile */
+    }
 }

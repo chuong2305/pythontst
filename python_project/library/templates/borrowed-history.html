@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="vi">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lịch sử mượn trả</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="{% static 'css/borrowed-history.css' %}?v={{ timestamp }}" />
+</head>
+
+<body>
+  <div class="app-container">
+    <div class="app-wrapper">
+      <!-- ===== Main Content ===== -->
+      <div class="app-content">
+        <!-- ===== Sidebar ===== -->
+        <!-- ===== Main ===== -->
+        <main class="history-main">
+          <div class="history-header">
+            <h2 class="history-title">Lịch sử mượn trả</h2>
+          </div>
+
+          <div class="history-controls">
+            <div class="history-search-wrapper">
+              <span class="material-symbols-outlined history-search-icon">search</span>
+              <input class="history-search-input" type="text" placeholder="Tìm kiếm theo tên sách..." />
+            </div>
+            <div class="history-filter-wrapper">
+              <span class="material-symbols-outlined history-filter-icon">filter_list</span>
+              <select class="history-filter-select">
+                <option>Tất cả thời gian</option>
+                <option>Tháng này</option>
+                <option>3 tháng qua</option>
+                <option>Năm nay</option>
+              </select>
+              <span class="material-symbols-outlined history-filter-expand">expand_more</span>
+            </div>
+          </div>
+
+          <div class="history-table-container">
+            <div class="history-table-wrapper">
+              <table class="history-table">
+                <thead class="history-table-head">
+                  <tr class="history-table-row">
+                    <th class="history-table-cell">Tên sách</th>
+                    <th class="history-table-cell">Tác giả</th>
+                    <th class="history-table-cell">Ngày mượn</th>
+                    <th class="history-table-cell">Ngày trả</th>
+                    <th class="history-table-cell history-table-cell--center">Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody class="history-table-body">
+                  <tr class="history-table-row">
+                    <td class="history-table-cell history-table-cell--title">Nhà Giả Kim</td>
+                    <td class="history-table-cell">Paulo Coelho</td>
+                    <td class="history-table-cell">15/05/2024</td>
+                    <td class="history-table-cell">30/05/2024</td>
+                    <td class="history-table-cell history-table-cell--center">
+                      <span class="history-status history-status--returned">Đã trả</span>
+                    </td>
+                  </tr>
+                  <tr class="history-table-row">
+                    <td class="history-table-cell history-table-cell--title">Đắc Nhân Tâm</td>
+                    <td class="history-table-cell">Dale Carnegie</td>
+                    <td class="history-table-cell">01/04/2024</td>
+                    <td class="history-table-cell">15/04/2024</td>
+                    <td class="history-table-cell history-table-cell--center">
+                      <span class="history-status history-status--returned">Đã trả</span>
+                    </td>
+                  </tr>
+                  <tr class="history-table-row">
+                    <td class="history-table-cell history-table-cell--title">Muôn Kiếp Nhân Sinh</td>
+                    <td class="history-table-cell">Nguyên Phong</td>
+                    <td class="history-table-cell">10/03/2024</td>
+                    <td class="history-table-cell">25/03/2024</td>
+                    <td class="history-table-cell history-table-cell--center">
+                      <span class="history-status history-status--overdue">Quá hạn</span>
+                    </td>
+                  </tr>
+                  <tr class="history-table-row">
+                    <td class="history-table-cell history-table-cell--title">Cây Cam Ngọt Của Tôi</td>
+                    <td class="history-table-cell">J. M. de Vasconcelos</td>
+                    <td class="history-table-cell">20/02/2024</td>
+                    <td class="history-table-cell">06/03/2024</td>
+                    <td class="history-table-cell history-table-cell--center">
+                      <span class="history-status history-status--returned">Đã trả</span>
+                    </td>
+                  </tr>
+                  <tr class="history-table-row">
+                    <td class="history-table-cell history-table-cell--title">Sapiens: Lược Sử Loài Người</td>
+                    <td class="history-table-cell">Yuval Noah Harari</td>
+                    <td class="history-table-cell">05/01/2024</td>
+                    <td class="history-table-cell">20/01/2024</td>
+                    <td class="history-table-cell history-table-cell--center">
+                      <span class="history-status history-status--returned">Đã trả</span>
+                    </td>
+                  </tr>
+                  <tr class="history-table-row">
+                    <td class="history-table-cell history-table-cell--title">Dế Mèn Phiêu Lưu Ký</td>
+                    <td class="history-table-cell">Tô Hoài</td>
+                    <td class="history-table-cell">12/12/2023</td>
+                    <td class="history-table-cell">27/12/2023</td>
+                    <td class="history-table-cell history-table-cell--center">
+                      <span class="history-status history-status--returned">Đã trả</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="history-pagination">
+            <span class="history-pagination-text">Hiển thị 1-6 của 25 kết quả</span>
+            <div class="history-pagination-controls">
+              <a class="history-pagination-btn" href="#" title="Trang trước">Trước</a>
+              <a class="history-pagination-btn" href="#">1</a>
+              <a class="history-pagination-btn history-pagination-btn--active" href="#">2</a>
+              <a class="history-pagination-btn" href="#">3</a>
+              <a class="history-pagination-btn" href="#" title="Trang sau">Sau</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <script>
+    const notificationToggle = document.getElementById('notification-toggle');
+    const notificationPopup = document.getElementById('notification-popup');
+
+    notificationToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      notificationPopup.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!notificationToggle.contains(e.target) && !notificationPopup.contains(e.target)) {
+        notificationPopup.classList.remove('active');
+      }
+    });
+
+    const notificationItems = notificationPopup.querySelectorAll('.notification-popup-item');
+    notificationItems.forEach(item => {
+      item.addEventListener('click', () => {
+        notificationPopup.classList.remove('active');
+      });
+    });
+  </script>
+</body>
+
+</html>

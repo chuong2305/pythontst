@@ -7,7 +7,7 @@
     <title>Trang người dùng - Thư viện</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}?v={{ timestamp }}">
 </head>
 <body class="home-user-page">
 <div class="wrapper">
@@ -26,6 +26,8 @@
                 </li>
                 <li><a href="{% url 'notify' %}" class="menu-item"><i class="fa-solid fa-bell"></i> <span>Thông báo</span></a>
                 </li>
+                <li><a href="{% url 'borrowed_history' %}" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Lịch sử mượn trả</span></a>
+                </li>
                 <li><a href="{% url 'library_card' %}" class="menu-item"><i class="fa-regular fa-id-card"></i> <span>Thẻ thư viện</span></a>
                 </li> 
                 <li><a href="{% url 'library_rule' %}" class="menu-item"><i class="fa-solid fa-book"></i> <span>Nội quy thư viện</span></a>
@@ -42,13 +44,12 @@
 
 <div class="user-wrapper">
             <div class="user-info">
-              <i class="fas fa-user-circle"></i>
-              <span>User</span>
-              <i
-                class="fas fa-chevron-down"
-                style="font-size: 12px; margin-left: 5px"
-              ></i>
+                <div class="avatar">
+                    <img src="{% static 'img/avatar.jpg' %}" alt="User Logo">
+                </div>
+                <span>Chuong</span>
             </div>
+
             <ul class="header__user-dropdown">
               <li>
                 <a href="user-infor.html"

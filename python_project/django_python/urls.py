@@ -9,13 +9,13 @@ urlpatterns = [
     path('', views.login_view, name='login_view'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path("home/welcome/", views.welcome_view, name="welcome_view"),
-
     path('home-user/', views.home_page_user, name='home_page_user'),
 
     # Dùng cùng 1 view để luôn có dữ liệu books
     path("home-user/user-books-author/", views.user_books_view, name="user_books_author"),
     path("home-user/user-books-type/", views.user_books_type, name="user_books_type"),
     path("home-user/user-borrowed/", views.user_borrowed, name="user_borrowed"),
+    path("home-user/borrowed-history/", views.borrowed_history, name="borrowed_history"),
     path("home-user/library-rule/", views.library_rule, name="library_rule"),
     path("home-user/library_card/", views.library_card, name="library_card"),
     path("home-user/notify/", views.notify, name="notify"),
