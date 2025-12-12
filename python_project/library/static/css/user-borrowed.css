@@ -1,3 +1,7 @@
+* {
+    font-family: "Inter", sans-serif;
+}
+
 .book-card {
     width: auto;
     max-width: 100%;

@@ -1,6 +1,7 @@
 
 * {
     box-sizing: border-box; /* Đặt box-sizing cho tất cả phần tử để bao gồm padding và border trong width/height */
+    font-family: "Inter", sans-serif; /* Font chữ Inter cho toàn bộ trang */
 }
 
 body {

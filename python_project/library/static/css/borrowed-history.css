@@ -1,5 +1,9 @@
 /* ===== History Page Styles ===== */
 
+* {
+    font-family: "Inter", sans-serif;
+}
+
 /* Main Container */
 .history-main {
     flex: 1;

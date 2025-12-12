@@ -32,6 +32,8 @@
                 </li> 
                 <li><a href="{% url 'library_rule' %}" class="menu-item"><i class="fa-solid fa-book"></i> <span>Nội quy thư viện</span></a>
                 </li>
+                <li><a href="{% url 'user_account' %}" class="menu-item"><i class="fa-solid fa-id-card"></i> <span>Tài khoản cá nhân</span></a>
+                </li>
             </ul>
         </nav>
     </aside>
@@ -52,7 +54,7 @@
 
             <ul class="header__user-dropdown">
               <li>
-                <a href="user-infor.html"
+                <a href="{% url 'user_account' %}" id="profileBtn"
                   ><i class="fas fa-id-card"></i> Hồ Sơ</a
                 >
               </li>
@@ -93,6 +95,31 @@
                 menuItems[j].classList.remove('active');
             }
             this.classList.add('active');
+        };
+    }
+
+    // Xử lý nút Hồ Sơ trong dropdown
+    var profileBtn = document.getElementById('profileBtn');
+    if (profileBtn) {
+        profileBtn.onclick = function (event) {
+            event.preventDefault();
+
+            // Đổi src iframe
+            document.getElementById('pageFrame').src = this.getAttribute('href');
+
+            // Cập nhật tiêu đề trang
+            document.getElementById('pageTitle').textContent = 'Tài khoản cá nhân';
+
+            // Cập nhật trạng thái active của menu item
+            for (var j = 0; j < menuItems.length; j++) {
+                menuItems[j].classList.remove('active');
+            }
+            // Tìm và active menu item "Tài khoản cá nhân"
+            for (var j = 0; j < menuItems.length; j++) {
+                if (menuItems[j].getAttribute('href') === "{% url 'user_account' %}") {
+                    menuItems[j].classList.add('active');
+                }
+            }
         };
     }
 </script>
