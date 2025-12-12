@@ -35,7 +35,7 @@ body.home-user-page {
 /* Sidebar */
 .sidebar {
     width: 310px;
-    background: #f6f7f8;
+    background: linear-gradient(135deg, #f1fff2, #2196F3);
     color: #111827;
     transition: all 0.3s ease;
     position: relative;
