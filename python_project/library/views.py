@@ -33,8 +33,6 @@ def library_card(request):
 
 def notify(request):
     return render(request, 'notify.html')
-def user_account(request):
-    return render(request, 'user_account.html')
 @require_http_methods(["GET", "POST"])
 def custom_login(request):
     if request.method == 'POST':
