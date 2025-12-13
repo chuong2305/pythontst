@@ -21,107 +21,240 @@
     </div>
 
     <!-- MIDDLE: FILTER SECTION (UI sẵn, chưa áp dụng lọc) -->
-    <div class="middle-section">
-        <div class="filter-group">
-            <label>Thể loại</label>
-            <select name="category">
-                <option value="">Tất cả</option>
-                {% for c in categories %}
-                  <option value="{{ c.category_id }}"
-                          {% if selected_category == c.category_id|stringformat:"s" %}selected{% endif %}>
-                    {{ c.category_name }}
-                  </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label>Tác giả</label>
-            <select name="author">
-                <option value="">Tất cả</option>
-                {% for a in authors %}
-                  <option value="{{ a.author_id }}"
-                          {% if selected_author == a.author_id|stringformat:"s" %}selected{% endif %}>
-                    {{ a.author_name }}
-                  </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label>Nhà xuất bản</label>
-            <select name="publisher">
-                <option value="">Tất cả</option>
-                {% for p in publishers %}
-                  <option value="{{ p.publish_id }}"
-                          {% if selected_publisher == p.publish_id|stringformat:"s" %}selected{% endif %}>
-                    {{ p.publish_name }}
-                  </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label>Ngày nhập</label>
-            <input type="date" name="date_add" value="{{ selected_date }}">
-        </div>
-
-        <div class="filter-group">
-            <label>Trạng thái</label>
-            <select name="status">
-                <option value="" {% if not selected_status %}selected{% endif %}>Tất cả</option>
-                <option value="available" {% if selected_status == "available" %}selected{% endif %}>Còn trống</option>
-                <option value="borrowed" {% if selected_status == "borrowed" %}selected{% endif %}>Đã được mượn</option>
-            </select>
-        </div>
+    <form method="get" class="middle-section"> <!-- CHUYỂN THÀNH FORM -->
+    <div class="filter-group">
+      <label>Thể loại</label>
+      <select name="category">
+        <option value="">Tất cả</option>
+        {% for c in categories %}
+          <option value="{{ c.category_id }}"
+            {% if selected_category == c.category_id|stringformat:"s" %}selected{% endif %}>
+            {{ c.category_name }}
+          </option>
+        {% endfor %}
+      </select>
     </div>
+
+    <div class="filter-group">
+      <label>Tác giả</label>
+      <select name="author">
+        <option value="">Tất cả</option>
+        {% for a in authors %}
+          <option value="{{ a.author_id }}"
+            {% if selected_author == a.author_id|stringformat:"s" %}selected{% endif %}>
+            {{ a.author_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Nhà xuất bản</label>
+      <select name="publisher">
+        <option value="">Tất cả</option>
+        {% for p in publishers %}
+          <option value="{{ p.publish_id }}"
+            {% if selected_publisher == p.publish_id|stringformat:"s" %}selected{% endif %}>
+            {{ p.publish_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Ngày nhập</label>
+      <input type="date" name="date_add" value="{{ selected_date }}">
+    </div>
+
+    <div class="filter-group">
+      <label>Trạng thái</label>
+      <select name="status">
+        <option value="" {% if not selected_status %}selected{% endif %}>Tất cả</option>
+        <option value="available" {% if selected_status == "available" %}selected{% endif %}>Còn trống</option>
+        <option value="borrowed" {% if selected_status == "borrowed" %}selected{% endif %}>Đã được mượn</option>
+      </select>
+    </div>
+
+    <!-- Nút áp dụng lọc -->
+    <div class="filter-actions">
+      <button type="submit" class="btn-apply">Áp dụng</button>
+      <!-- tùy chọn: nút xóa lọc -->
+      <a href="{% url 'user_books_author' %}" class="btn-reset">Xóa lọc</a>
+    </div>
+  </form>
 
     <!-- BOTTOM: BOOK DISPLAY (HIỂN THỊ TOÀN BỘ SÁCH) -->
     <div class="bottom-section">
         <h2 class="section-title">Danh sách sách</h2>
 
         <div class="book-display">
-            {% if books %}
-                {% for b in books %}
-                    <div class="book-card">
-                        <div class="book-img">
-                            <!-- Nếu có ảnh sau này:
-                            <img src="{{ b.image.url }}" alt="{{ b.book_name }}">
-                            -->
-                        </div>
-                        <div class="book-info">
-                            <h3 class="book-title">{{ b.book_name }}</h3>
-                            <p class="book-author">Tác giả: {{ b.author.author_name }}</p>
-                            <p class="book-categories">
-                                Thể loại:
-                                {% with cats=b.categories.all %}
-                                    {% if cats %}
-                                        {% for c in cats %}
-                                            {{ c.category_name }}{% if not forloop.last %}, {% endif %}
-                                        {% endfor %}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                {% endwith %}
-                            </p>
-                            <p class="book-publisher">NXB: {{ b.publisher.publish_name }}</p>
-                            <p class="book-year">Năm XB: {{ b.publishYear|default:"-" }}</p>
-                            <p class="book-date">Ngày nhập: {{ b.dateAdd }}</p>
-                            {% if b.available > 0 %}
-                                <p class="book-status available">Trạng thái: Còn trống ({{ b.available }})</p>
-                            {% else %}
-                                <p class="book-status borrowed">Trạng thái: Đã được mượn</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>Không có sách nào trong cơ sở dữ liệu.</p>
-            {% endif %}
+  {% if books %}
+    {% for b in books %}
+      <div class="book-card"
+           data-title="{{ b.book_name }}"
+           data-author="{{ b.author.author_name }}"
+           data-categories="{% for c in b.categories.all %}{{ c.category_name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+           data-publisher="{{ b.publisher.publish_name }}"
+           data-year="{{ b.publishYear|default:"-" }}"
+           data-date="{{ b.dateAdd }}"
+           data-status="{% if b.available > 0 %}Còn trống ({{ b.available }}){% else %}Đã được mượn{% endif %}"
+           data-description="{{ b.description|default_if_none:''|escape }}"
+           data-image="{% if b.image %}{{ b.image.url }}{% endif %}">
+        <div class="book-img">
+          {% if b.image %}
+            <img src="{{ b.image.url }}" alt="{{ b.book_name }}">
+          {% else %}
+            <div class="img-placeholder">Không có ảnh</div>
+          {% endif %}
         </div>
+        <div class="book-info">
+          <h3 class="book-title">{{ b.book_name }}</h3>
+          <p class="book-author">Tác giả: {{ b.author.author_name }}</p>
+          <p class="book-categories">
+            Thể loại:
+            {% with cats=b.categories.all %}
+              {% if cats %}
+                {% for c in cats %}
+                  {{ c.category_name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              {% else %}-{% endif %}
+            {% endwith %}
+          </p>
+          <p class="book-publisher">NXB: {{ b.publisher.publish_name }}</p>
+          <p class="book-year">Năm XB: {{ b.publishYear|default:"-" }}</p>
+          <p class="book-date">Ngày nhập: {{ b.dateAdd }}</p>
+          {% if b.available > 0 %}
+            <p class="book-status available">Trạng thái: Còn trống ({{ b.available }})</p>
+          {% else %}
+            <p class="book-status borrowed">Trạng thái: Đã được mượn</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>Không có sách nào trong cơ sở dữ liệu.</p>
+  {% endif %}
+</div>
     </div>
 
 </div>
+<!-- Modal chi tiết sách -->
+<div class="book-modal-backdrop" id="bookModalBackdrop" aria-hidden="true">
+  <div class="book-modal" role="dialog" aria-modal="true" aria-labelledby="bookModalTitle">
+    <button class="modal-close" id="bookModalClose" aria-label="Đóng">×</button>
 
+    <h3 class="modal-title" id="bookModalTitle">Thông tin sách</h3>
+
+    <div class="modal-body">
+      <div class="modal-left">
+        <div class="modal-img-wrap">
+          <img id="modalBookImg" alt="Ảnh sách">
+        </div>
+      </div>
+      <div class="modal-right">
+        <div class="modal-line modal-name" id="modalBookName"></div>
+        <div class="modal-line">Tác giả: <span id="modalBookAuthor"></span></div>
+        <div class="modal-line">Thể loại: <span id="modalBookCategories"></span></div>
+        <div class="modal-line">NXB: <span id="modalBookPublisher"></span></div>
+        <div class="modal-line">Năm XB: <span id="modalBookYear"></span></div>
+        <div class="modal-line">Ngày nhập: <span id="modalBookDate"></span></div>
+        <div class="modal-line">Trạng thái: <span id="modalBookStatus"></span></div>
+      </div>
+    </div>
+
+    <div class="modal-desc">
+      <label>Mô tả sách</label>
+      <div class="modal-desc-content" id="modalBookDesc"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-confirm" id="modalConfirmBorrow">Xác nhận mượn</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const backdrop = document.getElementById('bookModalBackdrop');
+    const closeBtn = document.getElementById('bookModalClose');
+
+    const imgEl = document.getElementById('modalBookImg');
+    const nameEl = document.getElementById('modalBookName');
+    const authorEl = document.getElementById('modalBookAuthor');
+    const catsEl = document.getElementById('modalBookCategories');
+    const pubEl = document.getElementById('modalBookPublisher');
+    const yearEl = document.getElementById('modalBookYear');
+    const dateEl = document.getElementById('modalBookDate');
+    const statusEl = document.getElementById('modalBookStatus');
+    const descEl = document.getElementById('modalBookDesc');
+
+    function openModal(data) {
+      // Điền dữ liệu
+      nameEl.textContent = data.title || '';
+      authorEl.textContent = data.author || '';
+      catsEl.textContent = data.categories || '';
+      pubEl.textContent = data.publisher || '';
+      yearEl.textContent = data.year || '-';
+      dateEl.textContent = data.date || '';
+      statusEl.textContent = data.status || '';
+      descEl.textContent = data.description || '—';
+
+      if (data.image) {
+        imgEl.src = data.image;
+        imgEl.style.display = 'block';
+      } else {
+        imgEl.removeAttribute('src');
+        imgEl.style.display = 'none';
+      }
+
+      backdrop.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden'; // khóa scroll nền
+    }
+
+    function closeModal() {
+      backdrop.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = ''; // khôi phục scroll
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', function(e) {
+      if (e.target === backdrop) closeModal(); // click ngoài modal để đóng
+    });
+
+    // Gắn sự kiện click cho từng card
+    document.querySelectorAll('.book-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const data = {
+          title: card.dataset.title,
+          author: card.dataset.author,
+          categories: card.dataset.categories,
+          publisher: card.dataset.publisher,
+          year: card.dataset.year,
+          date: card.dataset.date,
+          status: card.dataset.status,
+          description: card.dataset.description,
+          image: card.dataset.image
+        };
+        openModal(data);
+      });
+    });
+
+    // Xác nhận mượn: tuỳ bạn gắn logic (POST hoặc chuyển trang)
+    document.getElementById('modalConfirmBorrow').addEventListener('click', () => {
+      // Ví dụ: chuyển đến trang mượn với query book_name
+      const bookName = nameEl.textContent;
+      alert('Xác nhận mượn: ' + bookName);
+      // TODO: gọi fetch/redirect tới view xử lý mượn
+      closeModal();
+    });
+
+    // Phím ESC để đóng
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && backdrop.getAttribute('aria-hidden') === 'false') {
+        closeModal();
+      }
+    });
+  })();
+</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Book, Author, Borrow, Category, Publisher, Account
-
+from django.utils.html import format_html
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
@@ -45,6 +45,22 @@ class BookAdmin(admin.ModelAdmin):
     )
     filter_horizontal = ("categories",)
     ordering = ("book_name",)
+    readonly_fields = ("public_url_display",)
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'book_name', 'author', 'categories', 'publisher',
+                'publishYear', 'price', 'quantity', 'available',
+            )
+        }),
+        ('Nội dung', {
+            'fields': ('description', 'image')
+        }),
+        ('Liên kết công khai', {
+            'fields': ('public_url_display',)
+        }),
+    )
 
     def get_author(self, obj):
         return obj.author.author_name
@@ -59,6 +75,16 @@ class BookAdmin(admin.ModelAdmin):
         return obj.publisher.publish_name
     get_publisher.short_description = "Publisher"
 
+    def public_url_display(self, obj):
+        if not obj or not getattr(obj, 'pk', None):
+            return "Chưa có URL vì đối tượng chưa được tạo."
+        try:
+            url = obj.get_absolute_url()
+        except Exception:
+            url = f"/books/{obj.pk}/"
+        return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>', url, url)
+
+    public_url_display.short_description = "Public URL"
 
 @admin.register(Borrow)
 class BorrowAdmin(admin.ModelAdmin):

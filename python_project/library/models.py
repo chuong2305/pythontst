@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import timedelta, date
+from django.urls import reverse
 
 # -------------------------
 # ACCOUNT
@@ -73,10 +74,14 @@ class Book(models.Model):
 
     # Giá sách để tính phạt theo % khi trả
     price = models.PositiveIntegerField(default=0)
+    description = models.TextField(blank=True)  # mô tả dài, có thể để trống
+    image = models.ImageField(upload_to='books/', blank=True, null=True)
 
     def __str__(self):
         return self.book_name
-
+    
+    def get_absolute_url(self):
+        return reverse('book_detail', kwargs={'pk': self.pk})
 
 # -------------------------
 # BORROW

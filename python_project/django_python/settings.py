@@ -102,7 +102,10 @@ JAZZMIN_SETTINGS = {
 
 WSGI_APPLICATION = 'django_python.wsgi.application'
 
+import os
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
