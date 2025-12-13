@@ -48,7 +48,15 @@ def custom_login(request):
     return render(request, 'login.html')
 
 def user_books_view(request):
-    # Hiển thị toàn bộ sách (chưa xử lý bộ lọc)
+    # Lấy tham số từ form GET
+    keyword = request.GET.get("keyword", "").strip()
+    selected_author = request.GET.get("author", "")
+    selected_category = request.GET.get("category", "")
+    selected_publisher = request.GET.get("publisher", "")
+    selected_date = request.GET.get("date_add", "")  # format yyyy-mm-dd từ input type="date"
+    selected_status = request.GET.get("status", "")  # "available" | "borrowed" | ""
+
+    # Base queryset
     books = (
         Book.objects
         .select_related("author", "publisher")
@@ -57,6 +65,40 @@ def user_books_view(request):
         .order_by("book_name")
     )
 
+    # Từ khoá (tên sách, tên tác giả, tên NXB)
+    if keyword:
+        books = books.filter(
+            Q(book_name__icontains=keyword) |
+            Q(author__author_name__icontains=keyword) |
+            Q(publisher__publish_name__icontains=keyword)
+        )
+
+    # Lọc theo thể loại (ManyToMany)
+    if selected_category:
+        books = books.filter(categories__category_id=selected_category)
+
+    # Lọc theo tác giả
+    if selected_author:
+        books = books.filter(author__author_id=selected_author)
+
+    # Lọc theo NXB
+    if selected_publisher:
+        books = books.filter(publisher__publish_id=selected_publisher)
+
+    # Lọc theo ngày nhập
+    if selected_date:
+        books = books.filter(dateAdd=selected_date)
+
+    # Lọc theo trạng thái
+    if selected_status == "available":
+        books = books.filter(available__gt=0)
+    elif selected_status == "borrowed":
+        books = books.filter(available=0)
+
+    # Xóa trùng do join M2M khi lọc categories
+    books = books.distinct()
+
+    # Dữ liệu cho dropdown
     authors = Author.objects.all().order_by("author_name")
     categories = Category.objects.all().order_by("category_name")
     publishers = Publisher.objects.all().order_by("publish_name")
@@ -66,10 +108,10 @@ def user_books_view(request):
         "authors": authors,
         "categories": categories,
         "publishers": publishers,
-        "keyword": "",
-        "selected_author": "",
-        "selected_category": "",
-        "selected_publisher": "",
-        "selected_status": "",
-        "selected_date": "",
+        "keyword": keyword,
+        "selected_author": selected_author,
+        "selected_category": selected_category,
+        "selected_publisher": selected_publisher,
+        "selected_status": selected_status,
+        "selected_date": selected_date,
     })

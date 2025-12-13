@@ -1,0 +1,8 @@
+﻿book_id,book_name,author_name,categories,publisher_name,publishYear,price,quantity,available,dateAdd
+5,Dune,Frank Herbert,Khoa học viễn tưởng,Chilton Books,1965,22000,1,1,2025-12-07
+1,Harry Potter and the Sorcerer's Stone,J.K.Rowling,Giả tưởng,Bloomsbury,1997,150000,1,1,2025-12-07
+4,Murder on the Orient Express,Agatha Christie,Trinh thám,Collins Crime Club,1934,120000,1,1,2025-12-07
+3,Norse Mythology,Neil Gaiman,Thần thoại,Headline,2017,180000,1,1,2025-12-07
+7,Sherlock Holmes: A Study in Scarlet,Arthur Conan Doyle,"Trinh thám, Kinh dị",Ward Lock & Co.,1887,120000,3,3,2025-12-09
+2,The Hobbit,J. R. R. Tolkien,Phiêu lưu,George Allen,1937,180000,1,1,2025-12-07
+6,The Shining,Stephen King,Kinh dị,Doubleday,1977,200000,1,1,2025-12-07
