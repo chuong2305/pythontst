@@ -1,12 +1,25 @@
 from django.contrib import admin
-from .models import Book, Author, Borrow, Category, Publisher, Account
+from django.utils import timezone
 from django.utils.html import format_html
+from .models import Account, Author, Category, Publisher, Book, Borrow
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ("account_name", "email", "username", "phone", "status", "role")
-    search_fields = ("account_name", "username", "email")
+    list_display = ("account_name", "account_id", "email", "username", "phone", "status", "role")
+    search_fields = ("account_name", "username", "email", "phone", "account_id")
+    ordering = ("account_name",)
 
+    fieldsets = (
+        (None, {
+            "fields": (
+                "account_id", "account_name", "email", "username", "password", "phone", "status", "role",
+            )
+        }),
+    )
+
+    def account_id_display(self, obj):
+        return obj.pk if obj and obj.pk else "Sẽ được tạo sau khi lưu"
+    account_id_display.short_description = "Account ID"
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
@@ -86,8 +99,60 @@ class BookAdmin(admin.ModelAdmin):
 
     public_url_display.short_description = "Public URL"
 
+from django.contrib import admin
+from django.utils import timezone
+from .models import Book, Author, Borrow, Category, Publisher, Account
+
 @admin.register(Borrow)
 class BorrowAdmin(admin.ModelAdmin):
-    list_display = ("user", "book", "borrow_date", "status")
+    list_display = ("user_display", "user_id_display", "book", "borrow_date", "due_date", "status_display")
     list_filter = ("status",)
     search_fields = ("user__account_name", "book__book_name")
+    actions = ["approve_borrow", "approve_return"]
+
+    def user_display(self, obj):
+        return getattr(obj.user, "account_name", obj.user)
+    user_display.short_description = "User"
+
+    def user_id_display(self, obj):
+        return getattr(obj.user, "account_id", None)
+    user_id_display.short_description = "Account ID"
+    user_id_display.admin_order_field = "user__account_id"
+
+    def status_display(self, obj):
+        return obj.get_status_display()
+    status_display.short_description = "Trạng thái"
+
+    @admin.action(description="Duyệt yêu cầu mượn")
+    def approve_borrow(self, request, queryset):
+        approved = 0
+        for borrow in queryset.select_related('book').filter(status='pending'):
+            # kiểm tra tồn kho
+            if not borrow.book or borrow.book.available <= 0:
+                continue
+            # cập nhật trạng thái và ngày mượn, hạn trả
+            borrow.status = 'borrowed'
+            borrow.borrow_date = timezone.now().date()
+            borrow.due_date = borrow.borrow_date + timezone.timedelta(days=14)
+            # trừ available
+            borrow.book.available -= 1
+            borrow.book.save()
+            borrow.save()
+            approved += 1
+        self.message_user(request, f"Đã chấp nhận {approved} yêu cầu mượn.")
+
+    @admin.action(description="Xác nhận trả")
+    def approve_return(self, request, queryset):
+        processed = 0
+        for borrow in queryset.select_related('book').filter(status__in=['await_return', 'borrowed']):
+            # cộng lại tồn kho
+            if borrow.book:
+                borrow.book.available += 1
+                borrow.book.save()
+            # chuyển sang đã trả, giữ lịch sử
+            borrow.status = 'returned'
+            borrow.return_date = timezone.now().date()
+            # nếu cần: borrow.calculate_fine()
+            borrow.save()
+            processed += 1
+        self.message_user(request, "Xác nhận trả thành công.")

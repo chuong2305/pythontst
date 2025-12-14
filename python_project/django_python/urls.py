@@ -13,7 +13,6 @@ urlpatterns = [
     path("home/welcome/", views.welcome_view, name="welcome_view"),
     path('home-user/', views.home_page_user, name='home_page_user'),
 
-    # Dùng cùng 1 view để luôn có dữ liệu books
     path("home-user/user-books-author/", views.user_books_view, name="user_books_author"),
     path("home-user/user-books-type/", views.user_books_type, name="user_books_type"),
     path("home-user/user-borrowed/", views.user_borrowed, name="user_borrowed"),
@@ -22,8 +21,12 @@ urlpatterns = [
     path("home-user/library_card/", views.library_card, name="library_card"),
     path("home-user/notify/", views.notify, name="notify"),
 
-    # Alias (có thể giữ để test)
     path('user/books/', views.user_books_view, name="user_books"),
+    path('borrow/request/<int:book_id>/', views.request_borrow, name='request_borrow'),
+    path('borrow/return/<int:borrow_id>/', views.confirm_return, name='confirm_return'),
+    path('borrow/pending/cancel/<int:borrow_id>/', views.cancel_pending_borrow, name='cancel_pending_borrow'),
+    path('borrow/return/cancel/<int:borrow_id>/', views.cancel_return_request, name='cancel_return_request'),
+    path('borrow/returned/delete/<int:borrow_id>/', views.delete_returned_borrow, name='delete_returned_borrow'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
