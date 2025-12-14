@@ -10,7 +10,15 @@
 
 <div class="book-page-container">
 
-    <!-- TOP: SEARCH SECTION (để sau xử lý) -->
+{% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+    <!-- TOP: SEARCH SECTION -->
     <div class="top-section">
         <h2 class="section-title">Tìm kiếm sách</h2>
         <form method="get" class="search-row">
@@ -20,8 +28,8 @@
         </form>
     </div>
 
-    <!-- MIDDLE: FILTER SECTION (UI sẵn, chưa áp dụng lọc) -->
-    <form method="get" class="middle-section"> <!-- CHUYỂN THÀNH FORM -->
+    <!-- MIDDLE: FILTER SECTION -->
+    <form method="get" class="middle-section">
     <div class="filter-group">
       <label>Thể loại</label>
       <select name="category">
@@ -79,7 +87,7 @@
     <div class="filter-actions">
       <button type="submit" class="btn-apply">Áp dụng</button>
       <!-- tùy chọn: nút xóa lọc -->
-      <a href="{% url 'user_books_author' %}" class="btn-reset">Xóa lọc</a>
+      <a href="{% url 'user_books_author' %}" class="btn-reset">Làm mới</a>
     </div>
   </form>
 
@@ -91,6 +99,7 @@
   {% if books %}
     {% for b in books %}
       <div class="book-card"
+           data-id="{{ b.pk }}"
            data-title="{{ b.book_name }}"
            data-author="{{ b.author.author_name }}"
            data-categories="{% for c in b.categories.all %}{{ c.category_name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
@@ -124,9 +133,9 @@
           <p class="book-year">Năm XB: {{ b.publishYear|default:"-" }}</p>
           <p class="book-date">Ngày nhập: {{ b.dateAdd }}</p>
           {% if b.available > 0 %}
-            <p class="book-status available">Trạng thái: Còn trống ({{ b.available }})</p>
+            <p class="book-status available">Số lượng: {{ b.available }} cuốn</p>
           {% else %}
-            <p class="book-status borrowed">Trạng thái: Đã được mượn</p>
+            <p class="book-status borrowed">Số lượng: đã hết sách</p>
           {% endif %}
         </div>
       </div>
@@ -188,8 +197,9 @@
     const statusEl = document.getElementById('modalBookStatus');
     const descEl = document.getElementById('modalBookDesc');
 
+    let currentBookId = null; // LƯU BOOK ID ĐANG XEM
+
     function openModal(data) {
-      // Điền dữ liệu
       nameEl.textContent = data.title || '';
       authorEl.textContent = data.author || '';
       catsEl.textContent = data.categories || '';
@@ -208,20 +218,21 @@
       }
 
       backdrop.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden'; // khóa scroll nền
+      document.body.style.overflow = 'hidden';
     }
 
     function closeModal() {
       backdrop.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = ''; // khôi phục scroll
+      document.body.style.overflow = '';
+      currentBookId = null; // reset
     }
 
     closeBtn.addEventListener('click', closeModal);
     backdrop.addEventListener('click', function(e) {
-      if (e.target === backdrop) closeModal(); // click ngoài modal để đóng
+      if (e.target === backdrop) closeModal();
     });
 
-    // Gắn sự kiện click cho từng card
+    // Gắn click cho từng card
     document.querySelectorAll('.book-card').forEach(card => {
       card.addEventListener('click', () => {
         const data = {
@@ -235,20 +246,19 @@
           description: card.dataset.description,
           image: card.dataset.image
         };
+        currentBookId = card.dataset.id; // LẤY ID
         openModal(data);
       });
     });
 
-    // Xác nhận mượn: tuỳ bạn gắn logic (POST hoặc chuyển trang)
+    // Submit form POST đến request_borrow
     document.getElementById('modalConfirmBorrow').addEventListener('click', () => {
-      // Ví dụ: chuyển đến trang mượn với query book_name
-      const bookName = nameEl.textContent;
-      alert('Xác nhận mượn: ' + bookName);
-      // TODO: gọi fetch/redirect tới view xử lý mượn
-      closeModal();
+      if (!currentBookId) return;
+      const form = document.getElementById('borrowRequestForm');
+      form.action = `/borrow/request/${currentBookId}/`; // hoặc {% url 'request_borrow' 0 %} rồi replace 0 bằng id
+      form.submit();
     });
 
-    // Phím ESC để đóng
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && backdrop.getAttribute('aria-hidden') === 'false') {
         closeModal();
@@ -256,5 +266,8 @@
     });
   })();
 </script>
+<form id="borrowRequestForm" method="post" style="display:none;">
+  {% csrf_token %}
+</form>
 </body>
 </html>

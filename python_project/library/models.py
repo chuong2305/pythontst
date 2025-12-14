@@ -6,16 +6,17 @@ from django.urls import reverse
 # ACCOUNT
 # -------------------------
 class Account(models.Model):
-    account_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
+    account_id = models.CharField(max_length=64, unique=True)
     account_name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    username = models.CharField(max_length=50, unique=True)
+    email = models.EmailField()
+    username = models.CharField(max_length=50)
     password = models.CharField(max_length=128)
     phone = models.CharField(max_length=20)
     
     STATUS_CHOICES = (
-        ('active', 'Active'),
-        ('inactive', 'Inactive'),
+        ('active', 'Kích hoạt'),
+        ('inactive', 'Chưa kích hoạt'),
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
 
@@ -69,8 +70,8 @@ class Book(models.Model):
     dateAdd = models.DateField(auto_now_add=True)
 
     # Số lượng nhập và số còn lại
-    quantity = models.PositiveIntegerField(default=1)
-    available = models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=5)
+    available = models.PositiveIntegerField(default=5)
 
     # Giá sách để tính phạt theo % khi trả
     price = models.PositiveIntegerField(default=0)
@@ -92,6 +93,7 @@ class Borrow(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
 
     borrow_date = models.DateField(auto_now_add=True)
+    due_date = models.DateField(null=True, blank=True)
 
     # Giới hạn ngày trả (mặc định 14 ngày)
     def default_due_date():
@@ -113,10 +115,12 @@ class Borrow(models.Model):
     fine = models.PositiveIntegerField(default=0)
 
     STATUS_CHOICES = (
-        ('borrowed', 'Borrowed'),
-        ('returned', 'Returned'),
+        ('pending', 'Chờ duyệt'),
+        ('borrowed', 'Đang mượn'),
+        ('await_return', 'Chờ xác nhận trả'),
+        ('returned', 'Đã trả'),
     )
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='borrowed')
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='pending')
 
     # -------------------------
     # Tính tiền phạt đầy đủ
