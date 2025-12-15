@@ -27,6 +27,8 @@ urlpatterns = [
     path('borrow/pending/cancel/<int:borrow_id>/', views.cancel_pending_borrow, name='cancel_pending_borrow'),
     path('borrow/return/cancel/<int:borrow_id>/', views.cancel_return_request, name='cancel_return_request'),
     path('borrow/returned/delete/<int:borrow_id>/', views.delete_returned_borrow, name='delete_returned_borrow'),
+
+    path('admin/get-pending/', views.get_pending_requests, name='get_pending_requests'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

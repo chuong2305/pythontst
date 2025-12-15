@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from datetime import date
 from .models import Book, Author, Category, Publisher, Account, Borrow
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse,HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login
 from functools import wraps
@@ -43,12 +43,6 @@ def user_books_author(request):
 
 def user_books_type(request):
     return render(request, 'user-books-type.html')
-
-def _get_current_account(request):
-    acc_id = request.session.get('account_id')
-    if not acc_id:
-        return None
-    return Account.objects.filter(account_id=acc_id).first()
 
 @session_login_required
 def user_borrowed(request):
@@ -200,22 +194,45 @@ def request_borrow(request, book_id):
     messages.success(request, f"Đã gửi yêu cầu mượn '{book.book_name}'. Vui lòng chờ admin duyệt.")
     return redirect('user_books_author')
 
+
+def calculate_days_left(borrow_instance):
+    """Hàm phụ trợ tính số ngày còn lại"""
+    if borrow_instance.due_date and borrow_instance.status == 'borrowed':
+        delta = borrow_instance.due_date - timezone.now().date()
+        return delta.days
+    return None
+
+
 @session_login_required
 @require_POST
 def confirm_return(request, borrow_id):
+    # Xác thực session và lấy account hiện tại
     account = _get_current_account(request)
     if not account:
+        messages.error(request, "Bạn cần đăng nhập.")
         return redirect('login_view')
 
+    # Lấy bản ghi mượn (đảm bảo thuộc về account hiện tại)
     b = get_object_or_404(Borrow, borrow_id=borrow_id, user=account)
-    if b.status != 'borrowed':
-        messages.warning(request, "Chỉ có thể xác nhận trả với sách đang mượn.")
-        return redirect('user_borrowed')
 
+    # Cập nhật trạng thái và ngày trả yêu cầu
     b.status = 'await_return'
     b.return_date = timezone.now().date()
     b.save()
     messages.success(request, f"Đã gửi yêu cầu trả '{b.book.book_name}'.")
+
+    # Debug: ghi lại header HTMX (nếu cần)
+    print("HTMX Header:", request.headers.get('HX-Request'))
+
+    # Nếu request từ HTMX, trả về partial fragment để HTMX swap
+    if request.headers.get('HX-Request'):
+        item_context = {
+            'borrow': b,
+            'days_left': None
+        }
+        return render(request, 'partials/borrow_card.html', {'item': item_context})
+
+    # Nếu không phải HTMX, redirect về trang quản lý
     return HttpResponseRedirect(reverse('user_borrowed') + '?tab=returned')
 
 @session_login_required
@@ -225,6 +242,8 @@ def cancel_pending_borrow(request, borrow_id):
     b = get_object_or_404(Borrow, borrow_id=borrow_id, user=account, status='pending')
     b.delete()
     messages.success(request, "Đã hủy yêu cầu mượn.")
+    if request.headers.get('HX-Request'):
+        return HttpResponse("")
     return redirect('user_borrowed')
 
 @session_login_required
@@ -241,6 +260,14 @@ def cancel_return_request(request, borrow_id):
     # b.return_date = None  # nếu muốn xoá ngày yêu cầu trả
     b.save()
     messages.success(request, "Đã hủy yêu cầu trả.")
+    if request.headers.get('HX-Request'):
+        # Tính lại ngày còn lại vì trạng thái quay về 'borrowed'
+        days_left = calculate_days_left(b)
+        item_context = {
+            'borrow': b,
+            'days_left': days_left
+        }
+        return render(request, 'partials/borrow_card.html', {'item': item_context})
     return HttpResponseRedirect(reverse('user_borrowed') + '?tab=return')
 
 @session_login_required
@@ -250,4 +277,41 @@ def delete_returned_borrow(request, borrow_id):
     b = get_object_or_404(Borrow, borrow_id=borrow_id, user=account, status='returned')
     b.delete()
     messages.success(request, "Đã xóa lịch sử đã trả.")
+    if request.headers.get('HX-Request'):
+        # Trả về rỗng để xóa card khỏi danh sách
+        return HttpResponse("")
     return HttpResponseRedirect(reverse('user_borrowed') + '?tab=returned')
+# ... các import cũ ...
+
+# View tìm sách cho Admin (HTMX)
+def search_book_admin(request):
+    q = request.GET.get('q', '').strip()
+    if not q:
+        return HttpResponse("")
+
+    # Logic tìm kiếm an toàn hơn
+    # Nếu q là số thì tìm theo ID hoặc Tên
+    if q.isdigit():
+        books = Book.objects.filter(
+            Q(pk=q) | Q(book_name__icontains=q)
+        )[:10]
+    else:
+        # Nếu q là chữ thì chỉ tìm theo Tên (để tránh lỗi tìm chữ trong cột ID số)
+        books = Book.objects.filter(
+            book_name__icontains=q
+        )[:10]
+
+    # NOTE: the actual partial file in templates uses a hyphen in its name
+    # (partials/admin_search-result.html). Use that exact filename so Django
+    # can find the template when HTMX requests the fragment.
+    return render(request, 'partials/admin_search-result.html', {'books': books})
+
+
+def get_pending_requests(request):
+    # Lấy các bản ghi có status = 'pending'
+    pending = Borrow.objects.filter(status='pending').select_related('user', 'book').order_by('-borrow_date')
+
+    return render(request, 'partials/admin_pending_list.html', {
+        'pending_requests': pending,
+        'pending_count': pending.count()
+    })
