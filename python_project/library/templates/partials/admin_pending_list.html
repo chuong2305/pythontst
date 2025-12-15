@@ -1,0 +1,22 @@
+<h3 class="borrow-info-title">Yêu cầu chờ duyệt ({{ pending_count }})</h3>
+<ul class="borrow-list-ul">
+    {% for req in pending_requests %}
+    <li style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+        <span>
+            <strong>{{ req.user.username }}</strong> muốn mượn
+            <span style="color: blue;">{{ req.book.book_name }}</span>
+            <br>
+            <small>{{ req.borrow_date }}</small>
+        </span>
+
+        <div>
+            <button class="add-btn" style="background: green; padding: 2px 5px;">Duyệt</button>
+        </div>
+    </li>
+    {% empty %}
+    <li>Currently no pending requests.</li>
+    {% endfor %}
+</ul>
+{% else %}
+    <p style="padding: 10px; color: #666;">Chưa có yêu cầu nào mới.</p>
+{% endif %}

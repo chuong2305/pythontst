@@ -1,0 +1,16 @@
+{% for book in books %}
+<div class="book-card">
+    <p><strong>ID:</strong> {{ book.book_id }}</p>
+    <p><strong>Tựa:</strong> {{ book.book_name }}</p>
+    <p><strong>Tác giả:</strong> {{ book.author.author_name }}</p>
+    <p><strong>Còn lại:</strong> {{ book.available }}</p>
+
+    <button type="button" class="add-btn"
+            data-bookid="{{ book.book_id }}"
+            data-title="{{ book.book_name }}">
+        Thêm vào phiếu
+    </button>
+</div>
+{% empty %}
+    <p style="padding: 10px; color: red;">Không tìm thấy sách nào khớp với từ khóa.</p>
+{% endfor %}
