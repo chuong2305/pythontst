@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'library',
+    'library.apps.LibraryConfig',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +57,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],  # Không cần nếu template của app nằm đúng vị trí
+        "DIRS": [BASE_DIR / "templates"],
         'APP_DIRS': True,  # BẮT BUỘC ĐỂ DJANGO TỰ TÌM template bên trong app
         'OPTIONS': {
             'context_processors': [
