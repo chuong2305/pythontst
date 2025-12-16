@@ -1,0 +1,23 @@
+{% extends "admin/change_list.html" %}
+{% block content %}
+  {{ block.super }}
+  <script>
+    (function () {
+      const pollUrl = window.location.pathname.replace(/\/+$/, '') + '/poll/';
+      let lastVersion = null;
+      setInterval(async function() {
+        try {
+          if (document.hidden) return;
+          const res = await fetch(pollUrl, {cache: 'no-store', credentials: 'same-origin'});
+          if (!res.ok) return;
+          const data = await res.json();
+          if (lastVersion === null) {
+            lastVersion = data.version;
+          } else if (data.version !== lastVersion) {
+            location.reload();
+          }
+        } catch (e) {}
+      }, 4000);
+    })();
+  </script>
+{% endblock %}

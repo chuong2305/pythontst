@@ -2,6 +2,11 @@ from django.contrib import admin
 from django.utils import timezone
 from django.utils.html import format_html
 from .models import Account, Author, Category, Publisher, Book, Borrow
+from datetime import timedelta
+from django.urls import path
+from django.http import JsonResponse
+from django.core.cache import cache
+
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
@@ -99,29 +104,44 @@ class BookAdmin(admin.ModelAdmin):
 
     public_url_display.short_description = "Public URL"
 
-from django.contrib import admin
-from django.utils import timezone
-from .models import Book, Author, Borrow, Category, Publisher, Account
+
+BORROW_VERSION_KEY = "borrows_version"
+
+def get_borrows_version():
+    v = cache.get(BORROW_VERSION_KEY)
+    if v is None:
+        cache.set(BORROW_VERSION_KEY, 1)
+        v = 1
+    return int(v)
+
+def bump_borrows_version():
+    if cache.get(BORROW_VERSION_KEY) is None:
+        cache.set(BORROW_VERSION_KEY, 1)
+    else:
+        try:
+            cache.incr(BORROW_VERSION_KEY)
+        except ValueError:
+            # một số backend không có incr
+            cache.set(BORROW_VERSION_KEY, get_borrows_version() + 1)
 
 @admin.register(Borrow)
 class BorrowAdmin(admin.ModelAdmin):
+    change_list_template = "partials/change_list.html"
     list_display = ("user_display", "user_id_display", "book", "borrow_date", "due_date", "status_display")
     list_filter = ("status",)
     search_fields = ("user__account_name", "book__book_name")
     actions = ["approve_borrow", "approve_return"]
 
-    def user_display(self, obj):
-        return getattr(obj.user, "account_name", obj.user)
-    user_display.short_description = "User"
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path("poll/", self.admin_site.admin_view(self.poll_view), name="library_borrow_poll"),
+        ]
+        return custom + urls
 
-    def user_id_display(self, obj):
-        return getattr(obj.user, "account_id", None)
-    user_id_display.short_description = "Account ID"
-    user_id_display.admin_order_field = "user__account_id"
-
-    def status_display(self, obj):
-        return obj.get_status_display()
-    status_display.short_description = "Trạng thái"
+    def poll_view(self, request):
+        # GET /admin/library/borrow/poll/
+        return JsonResponse({"version": get_borrows_version(), "now": timezone.now().isoformat()})
 
     @admin.action(description="Duyệt yêu cầu mượn")
     def approve_borrow(self, request, queryset):
@@ -139,6 +159,8 @@ class BorrowAdmin(admin.ModelAdmin):
             borrow.book.save()
             borrow.save()
             approved += 1
+        if approved:
+            bump_borrows_version()
         self.message_user(request, f"Đã chấp nhận {approved} yêu cầu mượn.")
 
     @admin.action(description="Xác nhận trả")
@@ -155,4 +177,31 @@ class BorrowAdmin(admin.ModelAdmin):
             # nếu cần: borrow.calculate_fine()
             borrow.save()
             processed += 1
+        if processed:
+            bump_borrows_version()
         self.message_user(request, "Xác nhận trả thành công.")
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        bump_borrows_version()
+
+    def delete_model(self, request, obj):
+        super().delete_model(request, obj)
+        bump_borrows_version()
+
+    def delete_queryset(self, request, queryset):
+        super().delete_queryset(request, queryset)
+        bump_borrows_version()
+
+    def user_display(self, obj):
+        return getattr(obj.user, "account_name", obj.user)
+    user_display.short_description = "User"
+
+    def user_id_display(self, obj):
+        return getattr(obj.user, "account_id", None)
+    user_id_display.short_description = "Account ID"
+    user_id_display.admin_order_field = "user__account_id"
+
+    def status_display(self, obj):
+        return obj.get_status_display()
+    status_display.short_description = "Trạng thái"
