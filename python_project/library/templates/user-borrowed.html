@@ -9,59 +9,45 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
   </head>
-  <body hx-headers='{"X-CSRFToken":"{{ csrf_token|escapejs }}"}'>
+
+  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <div class="borrow-wrapper">
-      <!-- Search Panel -->
+
       <form class="search-panel" method="GET" action="">
         <input type="text" name="q" placeholder="Tìm người dùng hoặc sách..." value="{{ request.GET.q|default:'' }}" />
         <button type="submit"><i class="fas fa-search"></i> Tìm</button>
       </form>
 
-      <!-- Tabs -->
       <div class="tabs">
         <button type="button" class="tab" data-tab="return">Đã mượn</button>
         <button type="button" class="tab" data-tab="returned">Đã trả</button>
         <span class="has-rent">Đã mượn {{ current_borrowed_count }} / {{ limit }} cuốn sách</span>
       </div>
 
-      <!-- Tab Đã mượn -->
-      <div class="tab-content" id="return">
-        {% if is_empty_active %}
-          <div class="empty-state" style="text-align: center; padding: 20px; color: #666;">
-                <i class="fas fa-book-open" style="font-size: 40px; margin-bottom: 10px;"></i>
-                <p>Bạn chưa mượn cuốn sách nào.</p>
-            </div>
-        {% endif %}
+        <div class="tab-content" id="return">
+        <div id="active-borrow-container"
+             hx-get="{% url 'get_user_active_borrows' %}"
+             hx-trigger="load, every 2s">
 
-        <div class="borrow-list">
-        {% for item in items %}
-                {% include 'partials/borrow_card.html' with item=item %}
-            {% endfor %}
-      </div>
-        </div>
-
-      <!-- Tab Đã trả -->
-      <div class="tab-content" id="returned">
-        {% if is_empty_returned %}
-          <div class="empty-state" style="text-align: center; padding: 20px; color: #666;">
-                <p>Lịch sử trả sách trống.</p>
-            </div>
-            {% endif %}
-
-        <div class="borrow-list">
-            {% for item in returned_items %}
-                {% include 'partials/borrow_card.html' with item=item %}
-            {% endfor %}
+             <p style="text-align:center; padding: 20px;">Đang cập nhật dữ liệu...</p>
         </div>
       </div>
-    </div>
 
-    <script>
+        <div class="tab-content" id="returned">
+            <div id="returned-borrow-container"
+                 hx-get="{% url 'get_user_returned_history' %}"
+                 hx-trigger="load, every 2s">
+
+                <p style="text-align:center; padding: 20px;">Đang tải lịch sử...</p>
+            </div>
+        </div>
+
+    </div> <script>
       // Chuyển tab
       document.addEventListener('DOMContentLoaded', () => {
         const tabs = document.querySelectorAll('.tab')
         const contents = document.querySelectorAll('.tab-content')
-      
+
         function showTab(tabId) {
           tabs.forEach((t) => t.classList.remove('active'))
           contents.forEach((c) => (c.style.display = 'none'))
@@ -70,14 +56,14 @@
           if (tabBtn) tabBtn.classList.add('active')
           if (content) content.style.display = 'block'
         }
-      
+
         // Đọc tham số tab từ URL
         const params = new URLSearchParams(window.location.search)
         const tabParam = params.get('tab')
-      
+
         // Nếu có ?tab=returned thì mở tab 'returned', ngược lại mặc định 'return'
         showTab(tabParam === 'returned' ? 'returned' : 'return')
-      
+
         tabs.forEach((tab) => {
           tab.addEventListener('click', () => showTab(tab.dataset.tab))
         })

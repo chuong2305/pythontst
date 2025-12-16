@@ -19,10 +19,10 @@
     {% endif %}
 
     {% if item.days_left is not None and item.borrow.status == 'borrowed' %}
-      <div class="borrow-meta">Còn lại: {{ item.days_left }} ngày</div>
+      <div class="borrow-meta" style="color: red;">Còn lại: {{ item.days_left }} ngày</div>
     {% endif %}
 
-    <div class="borrow-status">Trạng thái: {{ item.borrow.get_status_display }}</div>
+    <div class="borrow-status">Trạng thái: <strong>{{ item.borrow.get_status_display }}</strong></div>
   </div>
 
   <div class="borrow-actions">
@@ -44,7 +44,7 @@
       </button>
 
     {% elif item.borrow.status == 'await_return' %}
-      <button type="button" class="btn-pending" disabled>Chờ xác nhận trả</button>
+      <button type="button" class="btn-pending" disabled>Chờ xác nhận</button>
       <button type="button" class="btn-delete"
               hx-post="{% url 'cancel_return_request' item.borrow.borrow_id %}"
               hx-confirm="Hủy yêu cầu trả cuốn sách này?"

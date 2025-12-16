@@ -29,6 +29,8 @@ urlpatterns = [
     path('borrow/returned/delete/<int:borrow_id>/', views.delete_returned_borrow, name='delete_returned_borrow'),
 
     path('admin/get-pending/', views.get_pending_requests, name='get_pending_requests'),
+    path('user/get-active-borrows/', views.get_user_active_borrows, name='get_user_active_borrows'),
+    path('user/get-returned-history/', views.get_user_returned_history, name='get_user_returned_history'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
