@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tạo phiếu mượn — Admin Borrow</title>
     <link rel="stylesheet" href="{% static 'css/admin-borrow.css' %}?v={{ timestamp }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5. 0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 <div class="page-container">
     <!-- Main two-column layout -->
     <main class="borrow-layout">
@@ -33,6 +34,12 @@
             </ul>
 
             <button class="confirm-btn">Xác nhận tạo phiếu</button>
+            <hr style="margin: 20px 0;">
+            <div id="auto-pending-zone"
+                 hx-get="{% url 'get_pending_requests' %}"
+                 hx-trigger="load, every 2s">
+                 <p>Đang tải danh sách chờ...</p>
+            </div>
         </div>
 
         <!-- RIGHT SIDE – Book Search -->
@@ -40,14 +47,24 @@
             <h2 class="section-title">Tìm sách</h2>
 
             <div class="search-box">
-                <input id="book-search" type="text" placeholder="Nhập Book ID hoặc tên sách..." />
-                <button id="btn-search" class="search-btn">
+                <input id="book-search"
+                       type="text"
+                       name="q"
+                       placeholder="Nhập Book ID hoặc tên sách..."
+
+                       hx-get="{% url 'search_book_admin' %}"
+                       hx-trigger="keyup changed delay:500ms, search"
+                       hx-target="#search-result"
+                />
+                <button id="btn-search" class="search-btn"
+                        type="button"
+                        hx-include="#book-search"
+                        hx-get="{% url 'search_book_admin' %}"
+                        hx-target="#search-result">
                     <i class="fas fa-search"></i> Tìm
                 </button>
             </div>
-
-            <div id="search-result" class="search-result">
-            </div>
+            <div id="search-result" class="search-result"></div>
         </div>
     </main>
 </div>
@@ -62,33 +79,18 @@ document.addEventListener("click", (e) => {
 
         const li = document.createElement("li");
         li.textContent = id + " – " + title;
+
+        // Thêm hidden input để khi submit form gửi được dữ liệu về server
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "book_ids";
+        input.value = id;
+        li.appendChild(input);
+
         list.appendChild(li);
     }
 });
 
-// (Optional) simple demo search: replace with real AJAX in backend
-document.getElementById('btn-search').addEventListener('click', () => {
-    const q = document.getElementById('book-search').value.trim();
-    const result = document.getElementById('search-result');
-    result.innerHTML = '';
-
-    if (!q) {
-        result.innerHTML = '<p>Nhập ID hoặc tên sách để tìm.</p>';
-        return;
-    }
-
-    // Demo fake result (replace with real fetch)
-    const card = document.createElement('div');
-    card.className = 'book-card';
-    card.innerHTML = `
-        <p><strong>ID:</strong> 3421</p>
-        <p><strong>Tựa:</strong> Đắc Nhân Tâm</p>
-        <p><strong>Tác giả:</strong> Dale Carnegie</p>
-        <p><strong>Còn lại:</strong> 3</p>
-        <button class="add-btn" data-bookid="3421" data-title="Đắc Nhân Tâm">Thêm vào phiếu</button>
-    `;
-    result.appendChild(card);
-});
 </script>
 
 </body>

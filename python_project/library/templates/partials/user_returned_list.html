@@ -1,0 +1,11 @@
+{% if is_empty_returned %}
+  <div class="empty-state" style="text-align: center; padding: 20px; color: #666;">
+        <p>Lịch sử trả sách trống.</p>
+    </div>
+{% endif %}
+
+<div class="borrow-list">
+    {% for item in returned_items %}
+        {% include 'partials/borrow_card.html' with item=item %}
+    {% endfor %}
+</div>

@@ -7,140 +7,47 @@
     <title>Quản lý mượn trả</title>
     <link rel="stylesheet" href="{% static 'css/user-borrowed.css' %}?v={{ timestamp }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
   </head>
-  <body>
-    <div class="borrow-wrapper">
-      <!-- Search Panel -->
-      <div class="search-panel">
-        <input type="text" placeholder="Tìm người dùng hoặc sách..." />
-        <button><i class="fas fa-search"></i> Tìm</button>
-      </div>
 
-      <!-- Tabs -->
+  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <div class="borrow-wrapper">
+
+      <form class="search-panel" method="GET" action="">
+        <input type="text" name="q" placeholder="Tìm người dùng hoặc sách..." value="{{ request.GET.q|default:'' }}" />
+        <button type="submit"><i class="fas fa-search"></i> Tìm</button>
+      </form>
+
       <div class="tabs">
-        <button class="tab" data-tab="return">Đã mượn</button>
-        <button class="tab" data-tab="returned">Đã trả</button>
+        <button type="button" class="tab" data-tab="return">Đã mượn</button>
+        <button type="button" class="tab" data-tab="returned">Đã trả</button>
         <span class="has-rent">Đã mượn {{ current_borrowed_count }} / {{ limit }} cuốn sách</span>
       </div>
 
-      <!-- Tab Đã mượn -->
-      <div class="tab-content" id="return">
-        {% if is_empty_active %}
-          <div class="empty-state">
-            <p>Hiện chưa có yêu cầu mượn hoặc sách đang mượn.</p>
-            <p>Vào Danh sách sách / tác giả để gửi yêu cầu mượn.</p>
-          </div>
-        {% endif %}
+        <div class="tab-content" id="return">
+        <div id="active-borrow-container"
+             hx-get="{% url 'get_user_active_borrows' %}"
+             hx-trigger="load, every 2s">
 
-        <div class="borrow-list">
-          {% for item in items %}
-            <div class="borrow-card">
-              <div class="borrow-thumb">
-                {% if item.borrow.book.image %}
-                  <img src="{{ item.borrow.book.image.url }}" alt="{{ item.borrow.book.book_name }}" />
-                {% else %}
-                  <div class="borrow-thumb-placeholder"></div>
-                {% endif %}
-              </div>
-
-              <div class="borrow-info">
-                <div class="borrow-title">{{ item.borrow.book.book_name }}</div>
-                <div class="borrow-meta">Tác giả: {{ item.borrow.book.author.author_name }}</div>
-                <div class="borrow-meta">Ngày mượn: {{ item.borrow.borrow_date|default:'—' }}</div>
-                <div class="borrow-meta">Hạn trả: {{ item.borrow.due_date|default:'—' }}</div>
-                {% if item.days_left is not None %}
-                  <div class="borrow-meta">Còn lại: {{ item.days_left }} ngày</div>
-                {% endif %}
-                <div class="borrow-status">Trạng thái: {{ item.borrow.get_status_display }}</div>
-              </div>
-
-              <div class="borrow-actions">
-                {% if item.borrow.status == 'pending' %}
-                  <button class="btn-pending" disabled>Chờ duyệt</button>
-                  <form method="post" action="{% url 'cancel_pending_borrow' item.borrow.borrow_id %}" style="margin-left:8px;">
-                    {% csrf_token %}
-                    <button class="btn-delete" onclick="return confirm('Xác nhận hủy yêu cầu mượn sách?');">Hủy</button>
-                  </form>
-                {% elif item.borrow.status == 'borrowed' %}
-                  <form method="post" action="{% url 'confirm_return' item.borrow.borrow_id %}">
-                    {% csrf_token %}
-                    <button class="btn-return">Xác nhận trả</button>
-                  </form>
-                {% elif item.borrow.status == 'await_return' %}
-                  <button class="btn-pending" disabled>Chờ xác nhận trả</button>
-                  <form method="post" action="{% url 'cancel_return_request' item.borrow.borrow_id %}" style="margin-left:8px;">
-                    {% csrf_token %}
-                    <button class="btn-delete" onclick="return confirm('Hủy yêu cầu trả cuốn sách này?');">Hủy</button>
-                  </form>
-                {% endif %}
-              </div>
-            </div>
-          {% endfor %}
+             <p style="text-align:center; padding: 20px;">Đang cập nhật dữ liệu...</p>
         </div>
       </div>
 
-      <!-- Tab Đã trả -->
-      <div class="tab-content" id="returned">
-        {% if is_empty_returned %}
-          <div class="empty-state">
-            <p>Chưa có mục nào trong danh sách đã trả.</p>
-          </div>
-        {% endif %}
+        <div class="tab-content" id="returned">
+            <div id="returned-borrow-container"
+                 hx-get="{% url 'get_user_returned_history' %}"
+                 hx-trigger="load, every 2s">
 
-        <div class="borrow-list">
-          {% for item in returned_items %}
-            <div class="borrow-card">
-              <div class="borrow-thumb">
-                {% if item.borrow.book.image %}
-                  <img src="{{ item.borrow.book.image.url }}" alt="{{ item.borrow.book.book_name }}" />
-                {% else %}
-                  <div class="borrow-thumb-placeholder"></div>
-                {% endif %}
-              </div>
-
-              <div class="borrow-info">
-                <div class="borrow-title">{{ item.borrow.book.book_name }}</div>
-                <div class="borrow-meta">Tác giả: {{ item.borrow.book.author.author_name }}</div>
-                <div class="borrow-meta">Ngày mượn: {{ item.borrow.borrow_date|default:'—' }}</div>
-                <div class="borrow-meta">
-                  {% if item.borrow.status == 'await_return' %}
-                    Ngày yêu cầu trả: {{ item.borrow.return_date|default:'—' }}
-                  {% else %}
-                    Ngày trả: {{ item.borrow.return_date|default:'—' }}
-                  {% endif %}
-                </div>
-                <div class="borrow-status">Trạng thái: {{ item.borrow.get_status_display }}</div>
-              </div>
-
-              <div class="borrow-actions">
-                {% if item.borrow.status == 'returned' %}
-                  <!-- Admin đã xác nhận trả -->
-                  <button class="btn-pending" disabled>Đã trả</button>
-                  <form method="post" action="{% url 'delete_returned_borrow' item.borrow.borrow_id %}" style="margin-left:8px;">
-                    {% csrf_token %}
-                    <button class="btn-delete" onclick="return confirm('Xóa lịch sử đã trả cuốn sách này?');">Xóa</button>
-                  </form>
-                {% elif item.borrow.status == 'await_return' %}
-                  <!-- Người dùng đã gửi yêu cầu trả, chờ admin xác nhận -->
-                  <button class="btn-pending" disabled>Chờ xác nhận</button>
-                  <form method="post" action="{% url 'cancel_return_request' item.borrow.borrow_id %}" style="margin-left:8px;">
-                    {% csrf_token %}
-                    <button class="btn-delete" onclick="return confirm('Hủy yêu cầu trả cuốn sách này?');">Hủy</button>
-                  </form>
-                {% endif %}
-              </div>
+                <p style="text-align:center; padding: 20px;">Đang tải lịch sử...</p>
             </div>
-          {% endfor %}
         </div>
-      </div>
-    </div>
 
-    <script>
+    </div> <script>
       // Chuyển tab
       document.addEventListener('DOMContentLoaded', () => {
         const tabs = document.querySelectorAll('.tab')
         const contents = document.querySelectorAll('.tab-content')
-      
+
         function showTab(tabId) {
           tabs.forEach((t) => t.classList.remove('active'))
           contents.forEach((c) => (c.style.display = 'none'))
@@ -149,14 +56,14 @@
           if (tabBtn) tabBtn.classList.add('active')
           if (content) content.style.display = 'block'
         }
-      
+
         // Đọc tham số tab từ URL
         const params = new URLSearchParams(window.location.search)
         const tabParam = params.get('tab')
-      
+
         // Nếu có ?tab=returned thì mở tab 'returned', ngược lại mặc định 'return'
         showTab(tabParam === 'returned' ? 'returned' : 'return')
-      
+
         tabs.forEach((tab) => {
           tab.addEventListener('click', () => showTab(tab.dataset.tab))
         })

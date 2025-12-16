@@ -154,8 +154,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    BASE_DIR / "django_python" / "library" / "static",
+    BASE_DIR / "library" / "static",
 ]
 
 
