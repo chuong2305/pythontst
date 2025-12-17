@@ -132,6 +132,11 @@ class BorrowAdmin(admin.ModelAdmin):
     search_fields = ("user__account_name", "book__book_name")
     actions = ["approve_borrow", "approve_return"]
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["initial_version"] = get_borrows_version()
+        return super().changelist_view(request, extra_context=extra_context)
+
     def get_urls(self):
         urls = super().get_urls()
         custom = [
@@ -153,7 +158,7 @@ class BorrowAdmin(admin.ModelAdmin):
             # cập nhật trạng thái và ngày mượn, hạn trả
             borrow.status = 'borrowed'
             borrow.borrow_date = timezone.now().date()
-            borrow.due_date = borrow.borrow_date + timezone.timedelta(days=14)
+            borrow.due_date = borrow.borrow_date + timedelta(days=14)
             # trừ available
             borrow.book.available -= 1
             borrow.book.save()

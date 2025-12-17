@@ -158,6 +158,13 @@ STATICFILES_DIRS = [
     BASE_DIR / "library" / "static",
 ]
 
+CACHES = {
+  "default": {
+    "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+    "LOCATION": BASE_DIR / "django_cache",
+    "TIMEOUT": None,
+  }
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

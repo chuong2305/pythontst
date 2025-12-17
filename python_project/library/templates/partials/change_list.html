@@ -3,20 +3,38 @@
   {{ block.super }}
   <script>
     (function () {
-      const pollUrl = window.location.pathname.replace(/\/+$/, '') + '/poll/';
+      const initialVersion = {{ initial_version|default:"0" }};
+      function makePollUrl() {
+        const base = window.location.pathname.replace(/\/+$/, '') + '/poll/';
+        const sep = base.includes('?') ? '&' : '?';
+        return base + sep + '_ts=' + Date.now(); // bust cache
+      }
       let lastVersion = null;
+
       setInterval(async function() {
         try {
           if (document.hidden) return;
-          const res = await fetch(pollUrl, {cache: 'no-store', credentials: 'same-origin'});
+          const res = await fetch(makePollUrl(), {
+            cache: 'no-store',
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' }
+          });
           if (!res.ok) return;
+          const ct = res.headers.get('content-type') || '';
+          if (!ct.includes('application/json')) return;
           const data = await res.json();
+
           if (lastVersion === null) {
+            // SO SÁNH NGAY LẦN ĐẦU
+            if (initialVersion && data.version !== initialVersion) {
+              location.reload();
+              return;
+            }
             lastVersion = data.version;
           } else if (data.version !== lastVersion) {
             location.reload();
           }
-        } catch (e) {}
+        } catch (e) { /* bỏ qua */ }
       }, 4000);
     })();
   </script>
