@@ -92,7 +92,7 @@ class Borrow(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
 
-    borrow_date = models.DateField(auto_now_add=True)
+    borrow_date = models.DateField(default=date.today)
     due_date = models.DateField(null=True, blank=True)
 
     # Giới hạn ngày trả (mặc định 14 ngày)
@@ -147,3 +147,44 @@ class Borrow(models.Model):
 
     def __str__(self):
         return f"{self.user.account_name} - {self.book.book_name}"
+
+
+# -------------------------
+# ASSOCIATION RULES (for recommendations)
+# -------------------------
+class BookAssociationRule(models.Model):
+    """
+    Stores association rules mined from borrow history. 
+    Example: If user borrows book A, recommend book B
+    """
+    rule_id = models.AutoField(primary_key=True)
+    
+    # Antecedent (if user borrows this book...)
+    antecedent_book = models.ForeignKey(
+        Book, 
+        on_delete=models.CASCADE, 
+        related_name='rules_as_antecedent'
+    )
+    
+    # Consequent (... then recommend this book)
+    consequent_book = models.ForeignKey(
+        Book, 
+        on_delete=models.CASCADE, 
+        related_name='rules_as_consequent'
+    )
+    
+    # Rule metrics
+    support = models.FloatField(default=0)      # How often both appear together
+    confidence = models.FloatField(default=0)   # P(consequent | antecedent)
+    lift = models.FloatField(default=0)         # How much more likely
+    
+    # Timestamp for when the rule was generated
+    created_at = models. DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('antecedent_book', 'consequent_book')
+        ordering = ['-lift', '-confidence']
+    
+    def __str__(self):
+        return f"{self.antecedent_book.book_name} → {self.consequent_book. book_name} (lift: {self.lift:.2f})"
