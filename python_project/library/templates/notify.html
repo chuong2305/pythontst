@@ -4,26 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}?v={{ timestamp }}">
-    <link rel="stylesheet" href="{% static 'css/notify.css' %}?v={{ timestamp }}" />
+    <link rel="stylesheet" href="{% static 'css/notify.css' %}?v={{ timestamp }}"/>
 </head>
 <body>
-<div class="book-notify">
-          <div class="book-image"></div>
-          <div class="book-info">
-            <div class="book-title">Harry Potter</div>
-            <div class="book-category">Thể loại: Giả tưởng</div>
-          </div>
-          <div class="time-return">Thời gian mượn còn lại: còn 1 ngày</div>
-          <button class="borrow-btn">Kiểm tra</button>
-</div>
-<div class="book-notify">
-          <div class="book-image"></div>
-          <div class="book-info">
-            <div class="book-title">The hobbit</div>
-            <div class="book-category">Thể loại: Giả tưởng / Phiêu lưu</div>
-          </div>
-          <div class="time-return">Thời gian mượn còn lại: đã quá hạn</div>
-          <button class="borrow-btn">Kiểm tra</button>
+<div class="notify-container">
+    {% for n in notifications %}
+        <div class="book-notify">
+            <div class="book-image">
+                {% if n.book.image %}
+                    <img src="{{ n.book.image.url }}" alt="{{ n.book.book_name }}" style="width:100%; height:100%; object-fit:cover;">
+                {% endif %}
+            </div>
+
+            <div class="notify-info">
+                {% if n.status == 'borrowed' %}
+                    Admin đã <strong>chấp nhận</strong> yêu cầu mượn cuốn sách <strong>"{{ n.book.book_name }}"</strong> của bạn.
+                {% elif n.status == 'returned' %}
+                    Admin đã <strong>xác nhận</strong> bạn đã trả cuốn sách <strong>"{{ n.book.book_name }}"</strong> thành công.
+                {% endif %}
+                <br>
+                <small style="color: gray;">{{ n.borrow_date|date:"d/m/Y" }}</small>
+            </div>
+        </div>
+    {% empty %}
+        <div style="text-align: center; padding: 20px;">Bạn chưa có thông báo nào.</div>
+    {% endfor %}
 </div>
 </body>
 </html>

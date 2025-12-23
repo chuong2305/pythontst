@@ -92,6 +92,9 @@ class Borrow(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
 
+    # Thêm trường này để kiểm tra xem thông báo đã được hiển thị/đọc chưa
+    is_notified = models.BooleanField(default=False)
+
     borrow_date = models.DateField(default=date.today)
     due_date = models.DateField(null=True, blank=True)
 
