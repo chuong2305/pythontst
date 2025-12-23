@@ -164,5 +164,44 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.querySelector('.search-input-rules');
+        const sections = document.querySelectorAll('.rules-section');
+
+        searchInput.addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+
+            sections.forEach(section => {
+                const title = section.querySelector('.rules-section-title').textContent.toLowerCase();
+                const items = section.querySelectorAll('.rules-item');
+                let hasMatch = false;
+
+                // Kiểm tra nội dung các mục bên trong
+                items.forEach(item => {
+                    if (item.querySelector('.rules-item-text').textContent.toLowerCase().includes(query)) {
+                        hasMatch = true;
+                    }
+                });
+
+                // Kiểm tra tiêu đề
+                if (title.includes(query)) {
+                    hasMatch = true;
+                }
+
+                // Điều khiển hiệu ứng bằng cách thêm/xóa class
+                if (query === "" || hasMatch) {
+                    // Hiện phần này ra mượt mà
+                    section.classList.remove('hidden-rule');
+                    // Đảm bảo các ô bên trong luôn hiện (giữ bố cục bình thường)
+                    items.forEach(item => item.style.display = 'flex');
+                } else {
+                    // Ẩn phần này đi mượt mà
+                    section.classList.add('hidden-rule');
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

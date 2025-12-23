@@ -71,7 +71,7 @@ body {
     color: #6b7280; /* Màu xám */
     line-height: 1.5; /* Chiều cao dòng */
     display: flex;
-    justify-content: space-between; /* Căn trái phải cho label và value */
+    gap: 8px; /* Khoảng cách giữa label và giá trị */
 }
 
 .card-text strong {
@@ -98,3 +98,7 @@ body {
         gap: 5px;
     }
 }
+.status-active {
+        color: #28a745; /* Mã màu xanh lá chuẩn (Success) */
+        font-weight: bold; /* Làm đậm để dễ nhìn hơn */
+    }

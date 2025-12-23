@@ -266,3 +266,21 @@ html.dark .search-input-rules {
         padding: 0 1rem; /* Khoảng đệm ngang cho mobile */
     }
 }
+/* Hiệu ứng cho từng phần nội quy */
+.rules-section {
+    transition: opacity 0.5s ease, transform 0.5s ease, max-height 0.5s ease, margin 0.5s ease;
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 1200px; /* Đặt một độ cao tối đa đủ lớn */
+    overflow: hidden;
+}
+
+/* Trạng thái khi bị ẩn đi */
+.rules-section.hidden-rule {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    pointer-events: none; /* Ngăn chặn tương tác khi đang ẩn */
+}

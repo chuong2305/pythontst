@@ -2,9 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods, require_POST
 from django.contrib import messages
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from datetime import date
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from functools import wraps
@@ -73,8 +71,27 @@ def library_card(request):
     return render(request, 'library_card.html')
 
 
+@session_login_required
 def notify(request):
-    return render(request, 'notify.html')
+    account = _get_current_account(request)
+    if not account:
+        return redirect('login_view')
+
+    # Lấy các thông báo:
+    # 1. Admin đã duyệt mượn (status='borrowed')
+    # 2. Admin đã xác nhận trả (status='returned')
+    # Sắp xếp theo ID mới nhất lên đầu
+    notifications = Borrow.objects.filter(
+        user=account,
+        status__in=['borrowed', 'returned']
+    ).select_related('book').order_by('-borrow_id')
+
+    # Sau khi lấy dữ liệu, bạn có thể đánh dấu là đã xem (tùy chọn logic của bạn)
+    # notifications.update(is_notified=True)
+
+    return render(request, 'notify.html', {
+        'notifications': notifications
+    })
 
 
 @require_http_methods(["GET", "POST"])
