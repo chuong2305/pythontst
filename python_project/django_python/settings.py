@@ -186,5 +186,6 @@ EMAIL_PORT = 587 # Cổng gửi mail tiêu chuẩn của Gmail (TLS)
 EMAIL_USE_TLS = True # Cho phép mã hóa dữ liệu khi gửi để đảm bảo bảo mật
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER') # Địa chỉ Gmail bạn dùng để gửi thông báo
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') # MẬT KHẨU ỨNG DỤNG (16 ký tự), không phải mật khẩu cá nhân
+EMAIL_DESTINATION = os.getenv('EMAIL_DESTINATION') # Địa chỉ mail nhận thông báo (thay bằng email của user khi gửi thực tế)
 DEFAULT_FROM_EMAIL = f"Thư viện Education <{EMAIL_HOST_USER}>" # Tên và mail hiển thị ở hộp thư người nhận
 
