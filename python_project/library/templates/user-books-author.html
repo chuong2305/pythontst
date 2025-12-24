@@ -100,7 +100,7 @@
     {% for b in books %}
       <div class="book-card"
            data-id="{{ b.pk }}"
-           data-title="{{ b.book_name }}"
+           data-available="{{ b.available }}" data-title="{{ b.book_name }}"
            data-author="{{ b.author.author_name }}"
            data-categories="{% for c in b.categories.all %}{{ c.category_name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
            data-publisher="{{ b.publisher.publish_name }}"
@@ -198,6 +198,7 @@
     const descEl = document.getElementById('modalBookDesc');
 
     let currentBookId = null; // LƯU BOOK ID ĐANG XEM
+    let currentBookAvailable = 0; // 1. THÊM BIẾN NÀY ĐỂ LƯU SỐ LƯỢNG
 
     function openModal(data) {
       nameEl.textContent = data.title || '';
@@ -247,6 +248,7 @@
           image: card.dataset.image
         };
         currentBookId = card.dataset.id; // LẤY ID
+        currentBookAvailable = parseInt(card.dataset.available); // 2. LẤY SỐ LƯỢNG TỪ DATA-ATTRIBUTE
         openModal(data);
       });
     });
@@ -254,6 +256,13 @@
     // Submit form POST đến request_borrow
     document.getElementById('modalConfirmBorrow').addEventListener('click', () => {
       if (!currentBookId) return;
+
+      // 3. THÊM ĐOẠN CHECK SỐ LƯỢNG NÀY
+      if (currentBookAvailable <= 0) {
+          alert("Sách đã hết bạn không thể yêu cầu mượn");
+          return; // Dừng lại, không gửi form
+      }
+
       const form = document.getElementById('borrowRequestForm');
       form.action = `/borrow/request/${currentBookId}/`; // hoặc {% url 'request_borrow' 0 %} rồi replace 0 bằng id
       form.submit();

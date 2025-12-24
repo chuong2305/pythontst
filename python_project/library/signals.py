@@ -12,10 +12,34 @@ def bump():
     cache.set(BORROW_VERSION_KEY, 1 if v is None else int(v)+1)
     print("Signals bump, version=", cache.get(BORROW_VERSION_KEY))
 
+
+def update_book_inventory(book):
+    """
+    Hàm này tính toán lại số lượng sách available.
+    Logic: Available = Quantity (Tổng) - Số phiếu đang mượn (Pending/Borrowed/Await_return)
+    """
+    # Đếm số lượng phiếu đang hoạt động (chưa trả xong)
+    active_borrows = Borrow.objects.filter(
+        book=book,
+        status__in=['pending', 'borrowed', 'await_return']
+    ).count()
+
+    # Tính lại available
+    new_available = book.quantity - active_borrows
+
+    # Đảm bảo không bị âm (đề phòng dữ liệu cũ sai lệch)
+    if new_available < 0:
+        new_available = 0
+
+    book.available = new_available
+    book.save()
+    print(f"Cập nhật kho sách '{book.book_name}': Còn lại {book.available}/{book.quantity}")
+
 @receiver(post_save, sender=Borrow)
 def borrow_changed(sender, instance, created, **kwargs):
     bump()
 
+    update_book_inventory(instance.book)
     # --- BẮT ĐẦU LOGIC GỬI MAIL ---
     if not created:  # Chỉ gửi khi Admin CẬP NHẬT (duyệt/trả), không gửi khi User mới tạo request
         user_email = instance.user.email  # Lấy email từ model Account qua quan hệ ForeignKey
@@ -61,3 +85,8 @@ def borrow_changed(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Borrow)
 def borrow_deleted(sender, instance, **kwargs):
     bump()
+
+    # --- 3. GỌI HÀM CẬP NHẬT TẠI ĐÂY ---
+    # Khi xóa phiếu mượn (ví dụ xóa yêu cầu), số lượng phải được cộng lại
+    update_book_inventory(instance.book)
+    # -----------------------------------
