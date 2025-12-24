@@ -23,7 +23,7 @@ def borrow_changed(sender, instance, created, **kwargs):
         user_name = instance.user.account_name  # Lấy tên người dùng để chào hỏi
 
         subject = ""
-        message = "Admin đã cập nhật trạng thái yêu cầu mượn sách của bạn.\n\n"
+        message = ""
 
         # Trường hợp Admin duyệt yêu cầu mượn (Status chuyển sang 'borrowed')
         if instance.status == 'borrowed':
@@ -51,7 +51,7 @@ def borrow_changed(sender, instance, created, **kwargs):
                     subject,  # Tiêu đề mail
                     message,  # Nội dung văn bản
                     settings.DEFAULT_FROM_EMAIL,  # Mail gửi đi (đã cấu hình ở settings)
-                    [settings.EMAIL_DESTINATION],  # Danh sách người nhận (email của user)
+                    [user_email],  # Danh sách người nhận (email của user)
                     fail_silently=False,  # Để False để Django báo lỗi nếu cấu hình SMTP sai
                 )
             except Exception as e:
