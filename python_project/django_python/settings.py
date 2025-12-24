@@ -56,7 +56,7 @@ ROOT_URLCONF = 'django_python.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # Không cần nếu template của app nằm đúng vị trí
+        # 'DIRS': [],  # Không cần nếu template của app nằm đúng vị trí
         "DIRS": [BASE_DIR / "templates"],
         'APP_DIRS': True,  # BẮT BUỘC ĐỂ DJANGO TỰ TÌM template bên trong app
         'OPTIONS': {
@@ -140,9 +140,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'vi'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
 USE_I18N = True
 
@@ -174,4 +174,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
 X_FRAME_OPTIONS = 'ALLOWALL'
+
+# Cấu hình gửi mail qua SMTP của Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # Khai báo thư viện xử lý email của Django
+EMAIL_HOST = 'smtp.gmail.com' # Địa chỉ máy chủ SMTP của Google
+EMAIL_PORT = 587 # Cổng gửi mail tiêu chuẩn của Gmail (TLS)
+EMAIL_USE_TLS = True # Cho phép mã hóa dữ liệu khi gửi để đảm bảo bảo mật
+EMAIL_HOST_USER = 'dangqpham0403@gmail.com' # Địa chỉ Gmail bạn dùng để gửi thông báo
+EMAIL_HOST_PASSWORD = 'wcfs gzsx mszg sptz' # MẬT KHẨU ỨNG DỤNG (16 ký tự), không phải mật khẩu cá nhân
+DEFAULT_FROM_EMAIL = 'Thư viện Education <dangqpham0403@gmail.com>' # Tên và mail hiển thị ở hộp thư người nhận
 

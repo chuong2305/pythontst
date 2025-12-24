@@ -33,7 +33,7 @@ def borrow_changed(sender, instance, created, **kwargs):
             subject = f"Thông báo: Yêu cầu mượn sách '{book_name}' đã được duyệt"
             message = (f"Chào {user_name},\n\n"
                        f"Yêu cầu mượn sách của bạn đã được Admin phê duyệt.\n"
-                       f"Hạn trả dự kiến: {instance.due_date}.\n"
+                       f"Hạn trả dự kiến: {display_date}.\n"
                        f"Vui lòng đến thư viện nhận sách.")
 
         # Trường hợp Admin xác nhận đã trả (Status chuyển sang 'returned')
@@ -51,7 +51,7 @@ def borrow_changed(sender, instance, created, **kwargs):
                     subject,  # Tiêu đề mail
                     message,  # Nội dung văn bản
                     settings.DEFAULT_FROM_EMAIL,  # Mail gửi đi (đã cấu hình ở settings)
-                    ['23130344@st.hcmuaf.edu.vn'],  # Danh sách người nhận (email của user)
+                    ['23130042@st.hcmuaf.edu.vn'],  # Danh sách người nhận (email của user)
                     fail_silently=False,  # Để False để Django báo lỗi nếu cấu hình SMTP sai
                 )
             except Exception as e:
