@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Danh sách sách / Nhà xuất bản</title>
     <link rel="stylesheet" href="{% static 'css/admin-book-author.css' %}?v={{ timestamp }}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -278,5 +279,37 @@
 <form id="borrowRequestForm" method="post" style="display:none;">
   {% csrf_token %}
 </form>
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            // Xác định loại icon dựa trên tags của message (error/success/warning)
+            var type = "{{ message.tags }}";
+            var icon = "info";
+            var title = "Thông báo";
+
+            if (type.includes("error")) {
+                icon = "error";
+                title = "Không thể mượn!";
+            } else if (type.includes("success")) {
+                icon = "success";
+                title = "Thành công";
+            } else if (type.includes("warning")) {
+                icon = "warning";
+                title = "Cảnh báo";
+            }
+
+            // Hiển thị Popup
+            Swal.fire({
+                icon: icon,
+                title: title,
+                text: "{{ message|escapejs }}", // Nội dung lỗi từ views/signals sẽ hiện ở đây
+                confirmButtonText: 'Đã hiểu',
+                confirmButtonColor: '#3085d6'
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}
 </body>
 </html>
