@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from functools import wraps
 from .models import Book, Author, Category, Publisher, Account, Borrow
+from django.core.exceptions import ValidationError
 
 
 # --- HELPER FUNCTIONS ---
@@ -174,8 +175,14 @@ def request_borrow(request, book_id):
         messages.warning(request, "Bạn đã đạt giới hạn 5 cuốn (bao gồm chờ duyệt).")
         return redirect('user_books_author')
 
-    Borrow.objects.create(user=account, book=book, status='pending')
-    messages.success(request, f"Đã gửi yêu cầu mượn '{book.book_name}'. Vui lòng chờ admin duyệt.")
+    try:
+        # Lệnh create này sẽ kích hoạt signals.py
+        Borrow.objects.create(user=account, book=book, status='pending')
+        messages.success(request, f"Đã gửi yêu cầu mượn '{book.book_name}'. Vui lòng chờ admin duyệt.")
+    except ValidationError as e:
+        msg_content = e.message if hasattr(e, 'message') else str(e)
+        messages.error(request, msg_content)
+
     return redirect('user_books_author')
 
 

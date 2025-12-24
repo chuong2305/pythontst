@@ -1,8 +1,9 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.core.cache import cache
 from django.core.mail import send_mail # IMPORT: Thư viện gửi mail của Django
 from django.conf import settings # IMPORT: Để lấy cấu hình từ settings.py
+from django.core.exceptions import ValidationError
 from .models import Borrow
 
 BORROW_VERSION_KEY = "borrows_version"
@@ -13,6 +14,21 @@ def bump():
     print("Signals bump, version=", cache.get(BORROW_VERSION_KEY))
 
 
+@receiver(pre_save, sender=Borrow)
+def check_duplicate_borrow(sender, instance, **kwargs):
+    # Chỉ kiểm tra khi tạo mới phiếu mượn (chưa có ID)
+    if not instance.pk:
+        # Kiểm tra xem user này đã có phiếu nào chưa kết thúc với cuốn sách này không
+        exists = Borrow.objects.filter(
+            user=instance.user,
+            book=instance.book,
+            status__in=['pending','borrowed', 'await_return']
+        ).exists()
+
+        if exists:
+            raise ValidationError(
+                f"Bạn đang mượn hoặc đang chờ duyệt cuốn sách '{instance.book.book_name}' rồi, không thể mượn thêm.")
+
 def update_book_inventory(book):
     """
     Hàm này tính toán lại số lượng sách available.
@@ -21,7 +37,7 @@ def update_book_inventory(book):
     # Đếm số lượng phiếu đang hoạt động (chưa trả xong)
     active_borrows = Borrow.objects.filter(
         book=book,
-        status__in=['pending', 'borrowed', 'await_return']
+        status__in=['borrowed', 'await_return']
     ).count()
 
     # Tính lại available
