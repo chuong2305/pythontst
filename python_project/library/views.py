@@ -70,7 +70,8 @@ def library_rule(request):
 
 def library_card(request):
     return render(request, 'library_card.html')
-
+def book_categories(request):
+    return render(request, 'book-categories.html')
 
 @session_login_required
 def notify(request):

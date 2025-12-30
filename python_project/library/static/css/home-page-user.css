@@ -123,7 +123,10 @@ body.home-user-page {
     z-index: 50;
     flex-shrink: 0;
 }
-
+.topbar-right {
+    display: flex;
+    align-items: center;
+}
 .page-title {
     font-size: 1.7rem;
     font-weight: 600;
@@ -290,4 +293,191 @@ iframe {
     width: 100%;
     height: 100%;
     border: 0;
+}
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: 20px;
+}
+.notification-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    outline: none;
+}
+
+.notification-button:hover {
+    background-color: #e5e7eb;
+}
+
+html.dark .notification-button {
+    background-color: #1f2937;
+    color: #9ca3af;
+}
+
+html.dark .notification-button:hover {
+    background-color: #374151;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -2px;           /* Đừng đẩy lên cao quá, để sát icon sẽ đẹp hơn */
+    right: -2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 10px;
+    background-color: #ef4444; /* Màu đỏ hiện đại (Red 500), không dùng red thuần */
+    color: #ffffff;
+    font-size: 10px;      /* Chữ nhỏ gọn */
+    font-weight: 700;     /* Chữ đậm */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff; /* Viền trắng tạo hiệu ứng cắt vào icon */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Bóng nhẹ tạo chiều sâu */
+    z-index: 10;
+}
+
+html.dark .notification-badge {
+    border-color: var(--background-dark);
+}
+
+/* Notification Popup */
+.notification-wrapper {
+    position: relative;
+}
+
+.notification-popup {
+    position: absolute;
+    top: 130%;
+    right: -10px;
+    margin-top: 0.5rem;
+    width: 320px;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    display: none;
+    overflow: hidden;
+}
+
+html.dark .notification-popup {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.notification-popup.active {
+    display: block;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-popup-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notification-popup-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.notification-popup-content {
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
+.notification-popup-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.notification-popup-item:hover {
+    background-color: var(--bg-primary);
+}
+
+.notification-popup-item:last-child {
+    border-bottom: none;
+}
+
+.notification-popup-icon {
+    flex-shrink: 0;
+    font-size: 1.5rem;
+    margin-top: 0.125rem;
+}
+
+.notification-popup-icon--info {
+    color: #3b82f6;
+}
+
+.notification-popup-icon--warning {
+    color: #f59e0b;
+}
+
+.notification-popup-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-popup-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-popup-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-popup-footer {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.notification-popup-footer a {
+    font-size: 0.875rem;
+    color: var(--primary);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.notification-popup-footer a:hover {
+    opacity: 0.8;
 }
