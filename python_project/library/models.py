@@ -1,6 +1,8 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from datetime import timedelta, date
 from django.urls import reverse
+from django.utils import timezone
 
 # -------------------------
 # ACCOUNT
@@ -80,7 +82,13 @@ class Book(models.Model):
 
     def __str__(self):
         return self.book_name
-    
+
+    def reserved_count(self):
+        return Borrow.objects.filter(
+            book=self,
+            status='reserved'
+        ).count()
+
     def get_absolute_url(self):
         return reverse('book_detail', kwargs={'pk': self.pk})
 
@@ -118,35 +126,91 @@ class Borrow(models.Model):
     fine = models.PositiveIntegerField(default=0)
 
     STATUS_CHOICES = (
-        ('pending', 'Chờ duyệt'),
+        ('reserved', 'Đã đặt trước'),
         ('borrowed', 'Đang mượn'),
-        ('await_return', 'Chờ xác nhận trả'),
         ('returned', 'Đã trả'),
     )
-    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default='reserved'
+    )
 
-    # -------------------------
-    # Tính tiền phạt đầy đủ
-    # -------------------------
     def calculate_fine(self):
         total_fine = 0
+        today = timezone.now().date()
 
-        # --- 1. Phạt trễ hạn ---
-        if self.return_date and self.return_date > self.due_date:
-            late_days = (self.return_date - self.due_date).days
-            total_fine += late_days * 3000   # 3000đ/ngày
+        # =====================
+        # PHẠT TRỄ HẠN
+        # =====================
+        if self.due_date:
+            # Nếu đang mượn → so với hôm nay
+            if self.status == 'borrowed':
+                late_days = (today - self.due_date).days
+            # Nếu đã trả → so với ngày trả
+            elif self.status == 'returned' and self.return_date:
+                late_days = (self.return_date - self.due_date).days
+            else:
+                late_days = 0
 
-        # --- 2. Phạt hư hại ---
+            if late_days > 0:
+                total_fine += late_days * 3000
+
+        # =====================
+        # PHẠT HƯ HẠI
+        # =====================
         price = self.book.price
-        if self.damage_status == "light":
+
+        if self.damage_status == 'light':
             total_fine += int(price * 0.2)
-        elif self.damage_status == "heavy":
+        elif self.damage_status == 'heavy':
             total_fine += int(price * 0.5)
-        elif self.damage_status == "lost":
+        elif self.damage_status == 'lost':
             total_fine += int(price)
 
-        self.fine = total_fine
         return total_fine
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        old_status = None
+
+        if not is_new:
+            old_status = Borrow.objects.get(pk=self.pk).status
+
+        if (
+                (is_new and self.status == 'borrowed') or
+                (old_status == 'reserved' and self.status == 'borrowed')
+        ):
+            reserved_count = Borrow.objects.filter(
+                book=self.book,
+                status='reserved'
+            ).exclude(pk=self.pk).count()
+
+            if self.book.available <= reserved_count:
+                raise ValidationError(
+                    "Hiện đã có người dùng khác đặt trước."
+                )
+
+        super().save(*args, **kwargs)
+
+        #  Trừ kho khi CHUYỂN SANG BORROWED
+        if (
+                (is_new and self.status == 'borrowed') or
+                (old_status == 'reserved' and self.status == 'borrowed')
+        ):
+            self.book.available -= 1
+            self.book.save(update_fields=['available'])
+
+        # Trả sách
+        if old_status == 'borrowed' and self.status == 'returned':
+            self.book.available += 1
+            self.book.save(update_fields=['available'])
+
+        if self.status in ['borrowed', 'returned']:
+            new_fine = self.calculate_fine()
+
+            if self.fine != new_fine:
+                Borrow.objects.filter(pk=self.pk).update(fine=new_fine)
 
     def __str__(self):
         return f"{self.user.account_name} - {self.book.book_name}"

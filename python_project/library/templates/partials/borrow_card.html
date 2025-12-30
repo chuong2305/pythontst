@@ -27,31 +27,14 @@
 
   <div class="borrow-actions">
 
-    {% if item.borrow.status == 'pending' %}
-      <button type="button" class="btn-pending" disabled>Chờ duyệt</button>
+    {% if item.borrow.status == 'reserved' %}
+      <button type="button" class="btn-pending" disabled>Đã đặt trước</button>
       <button type="button" class="btn-delete"
               hx-post="{% url 'cancel_pending_borrow' item.borrow.borrow_id %}"
-              hx-confirm="Xác nhận hủy yêu cầu mượn sách?"
+              hx-confirm="Xác nhận hủy đặt trước?"
               hx-target="#card-{{ item.borrow.borrow_id }}"
               hx-swap="outerHTML"> Hủy
       </button>
-
-    {% elif item.borrow.status == 'borrowed' %}
-      <button type="button" class="btn-return"
-              hx-post="{% url 'confirm_return' item.borrow.borrow_id %}"
-              hx-target="#card-{{ item.borrow.borrow_id }}"
-              hx-swap="outerHTML"> Xác nhận trả
-      </button>
-
-    {% elif item.borrow.status == 'await_return' %}
-      <button type="button" class="btn-pending" disabled>Chờ xác nhận</button>
-      <button type="button" class="btn-delete"
-              hx-post="{% url 'cancel_return_request' item.borrow.borrow_id %}"
-              hx-confirm="Hủy yêu cầu trả cuốn sách này?"
-              hx-target="#card-{{ item.borrow.borrow_id }}"
-              hx-swap="outerHTML"> Hủy
-      </button>
-
     {% elif item.borrow.status == 'returned' %}
       <button type="button" class="btn-pending" disabled>Đã trả</button>
       <button type="button" class="btn-delete"

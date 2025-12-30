@@ -9,53 +9,40 @@ from .models import Borrow
 BORROW_VERSION_KEY = "borrows_version"
 
 def bump():
-    v = cache.get(BORROW_VERSION_KEY)
-    cache.set(BORROW_VERSION_KEY, 1 if v is None else int(v)+1)
-    print("Signals bump, version=", cache.get(BORROW_VERSION_KEY))
+    try:
+        v = cache.get(BORROW_VERSION_KEY)
+        new_v = 1 if v is None else int(v) + 1
+        cache.set(BORROW_VERSION_KEY, new_v)
+        print("Signals bump, version =", new_v)
+    except Exception as e:
+        print("Cache bump error:", e)
+
 
 
 @receiver(pre_save, sender=Borrow)
 def check_duplicate_borrow(sender, instance, **kwargs):
-    # Chỉ kiểm tra khi tạo mới phiếu mượn (chưa có ID)
     if not instance.pk:
-        # Kiểm tra xem user này đã có phiếu nào chưa kết thúc với cuốn sách này không
         exists = Borrow.objects.filter(
             user=instance.user,
             book=instance.book,
-            status__in=['pending','borrowed', 'await_return']
+            status__in=['reserved', 'borrowed']
         ).exists()
 
         if exists:
             raise ValidationError(
-                f"Bạn đang mượn hoặc đang chờ duyệt cuốn sách '{instance.book.book_name}' rồi, không thể mượn thêm.")
+                f"Bạn đã đặt hoặc đang mượn sách '{instance.book.book_name}'.")
 
-def update_book_inventory(book):
-    """
-    Hàm này tính toán lại số lượng sách available.
-    Logic: Available = Quantity (Tổng) - Số phiếu đang mượn (Pending/Borrowed/Await_return)
-    """
-    # Đếm số lượng phiếu đang hoạt động (chưa trả xong)
-    active_borrows = Borrow.objects.filter(
-        book=book,
-        status__in=['borrowed', 'await_return']
-    ).count()
 
-    # Tính lại available
-    new_available = book.quantity - active_borrows
-
-    # Đảm bảo không bị âm (đề phòng dữ liệu cũ sai lệch)
-    if new_available < 0:
-        new_available = 0
-
-    book.available = new_available
-    book.save()
-    print(f"Cập nhật kho sách '{book.book_name}': Còn lại {book.available}/{book.quantity}")
+@receiver(pre_save, sender=Borrow)
+def track_status_change(sender, instance, **kwargs):
+    if not instance.pk:
+        instance._old_status = None
+    else:
+        instance._old_status = Borrow.objects.get(pk=instance.pk).status
 
 @receiver(post_save, sender=Borrow)
 def borrow_changed(sender, instance, created, **kwargs):
     bump()
-
-    update_book_inventory(instance.book)
     # --- BẮT ĐẦU LOGIC GỬI MAIL ---
     if not created:  # Chỉ gửi khi Admin CẬP NHẬT (duyệt/trả), không gửi khi User mới tạo request
         user_email = instance.user.email  # Lấy email từ model Account qua quan hệ ForeignKey
@@ -70,19 +57,20 @@ def borrow_changed(sender, instance, created, **kwargs):
             # Định dạng lại ngày tháng sang dd/mm/yyyy
             display_date = instance.due_date.strftime('%d/%m/%Y') if instance.due_date else "Chưa xác định"
 
-            subject = f"Thông báo: Yêu cầu mượn sách '{book_name}' đã được duyệt"
+            subject = f"Thông báo: Bạn đã mượn sách '{book_name}', hạn trả: '{display_date}'"
             message = (f"Chào {user_name},\n\n"
-                       f"Yêu cầu mượn sách của bạn đã được Admin phê duyệt.\n"
+                       f"Bạn đã mượn sách '{book_name}'.\n"
                        f"Hạn trả dự kiến: {display_date}.\n"
-                       f"Vui lòng đến thư viện nhận sách.")
+                       f"Vui lòng trả sách đúng hạn và bảo quản sách không bị mất hoặc hư hại.")
 
         # Trường hợp Admin xác nhận đã trả (Status chuyển sang 'returned')
         elif instance.status == 'returned':
-            subject = f"Thông báo: Xác nhận trả sách '{book_name}' thành công"
+            subject = f"Thông báo: Bạn đã trả sách '{book_name}' hoàn tất"
             message = (f"Chào {user_name},\n\n"
-                       f"Thư viện đã nhận được sách bạn trả.\n"
+                       f"Bạn đã trả sách '{book_name}' hoàn tất.\n"
+                       f"Tình trạng sách: '{instance.damage_status}'.\n"
                        f"Tổng tiền phạt phát sinh: {instance.fine} VNĐ.\n"
-                       f"Cảm ơn bạn đã sử dụng thư viện!")
+                       f"Chúc bạn một ngày tốt lành!")
 
         # Thực hiện gửi mail thực tế nếu có nội dung (rơi vào 2 trường hợp trên)
         if subject:
@@ -104,5 +92,8 @@ def borrow_deleted(sender, instance, **kwargs):
 
     # --- 3. GỌI HÀM CẬP NHẬT TẠI ĐÂY ---
     # Khi xóa phiếu mượn (ví dụ xóa yêu cầu), số lượng phải được cộng lại
-    update_book_inventory(instance.book)
     # -----------------------------------
+
+
+
+
