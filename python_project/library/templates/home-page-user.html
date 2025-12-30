@@ -20,14 +20,12 @@
         </div>
         <nav class="nav-menu">
             <ul>
-                <li><a href="{% url 'user_books_author' %}" class="menu-item active"><i class="fas fa-book"></i> <span>Danh sách sách / tác giả</span></a>
+                <li><a href="{% url 'user_books_author' %}" class="menu-item active"><i class="fas fa-book"></i> <span>Thư viện sách</span></a>
                 </li>
                 <li><a href="{% url 'user_borrowed' %}" class="menu-item"><i class="fas fa-hand-holding"></i> <span>Sách đang mượn</span></a>
                 </li>
-                <li><a href="{% url 'notify' %}" class="menu-item"><i class="fa-solid fa-bell"></i> <span>Thông báo</span></a>
+                <li><a href="{% url 'book_categories' %}" class="menu-item"><i class="fa-solid fa-layer-group"></i> <span>Thể loại sách</span></a>
                 </li>
-                <li><a href="{% url 'library_card' %}" class="menu-item"><i class="fa-regular fa-id-card"></i> <span>Thẻ thư viện</span></a>
-                </li> 
                 <li><a href="{% url 'library_rule' %}" class="menu-item"><i class="fa-solid fa-book"></i> <span>Nội quy thư viện</span></a>
                 </li>
             </ul>
@@ -40,27 +38,58 @@
         <header class="topbar">
             <div class="page-title" id="pageTitle">User Page</div>
 
-<div class="user-wrapper">
-            <div class="user-info">
-                <div class="avatar">
-                    <img src="{% static 'img/avatar.jpg' %}" alt="User Logo">
+            <div class="topbar-right">
+                <div class="header-actions">
+                    <div class="notification-wrapper">
+                        <button class="notification-button" aria-label="Notifications" id="notification-toggle">
+                            <span class="material-symbols-outlined">notifications</span>
+                            <div class="notification-badge">3</div>
+                        </button>
+                        <div class="notification-popup" id="notification-popup">
+                            <div class="notification-popup-header">
+                                <h3>Thông báo</h3>
+                            </div>
+                            <div class="notification-popup-content">
+                                <div class="notification-popup-item">
+                                    <span class="material-symbols-outlined notification-popup-icon notification-popup-icon--info">info</span>
+                                    <div class="notification-popup-text">
+                                        <p class="notification-popup-title">Sự kiện giao lưu tác giả</p>
+                                        <p class="notification-popup-desc">Diễn ra Thứ 7 tuần này</p>
+                                    </div>
+                                </div>
+                                <div class="notification-popup-item">
+                                    <span class="material-symbols-outlined notification-popup-icon notification-popup-icon--warning">schedule</span>
+                                    <div class="notification-popup-text">
+                                        <p class="notification-popup-title">Sách sắp đến hạn trả</p>
+                                        <p class="notification-popup-desc">Hạn trả ngày mai</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notification-popup-footer">
+                                <a href="{% url 'notify' %}" id="viewAllNotiBtn">Xem tất cả →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-wrapper">
+                    <div class="user-info">
+                        <div class="avatar">
+                            <img src="{% static 'img/avatar.jpg' %}" alt="User Logo">
+                        </div>
+                    </div>
+
+                    <ul class="header__user-dropdown">
+                        <li>
+                            <a href="{% url 'library_card' %}" id="profileBtn"><i class="fas fa-id-card"></i> Thẻ thư
+                                viện</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'login_view' %}"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-
-            <ul class="header__user-dropdown">
-              <li>
-                <a href="{% url 'library_card' %}" id="profileBtn"
-                  ><i class="fas fa-id-card"></i> Thẻ thư viện</a
-                >
-              </li>
-              <li>
-                <a href="{% url 'login_view' %}"
-                  ><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a
-                >
-              </li>
-            </ul>
-          </div>
-
         </header>
         <div class="content-area">
             <iframe src="{% url 'user_books_author' %}" id="pageFrame" frameborder="0"></iframe>
@@ -112,6 +141,54 @@
             // Tìm và active menu item "Thẻ thư viện"
             for (var j = 0; j < menuItems.length; j++) {
                 if (menuItems[j].getAttribute('href') === "{% url 'library_card' %}") {
+                    menuItems[j].classList.add('active');
+                }
+            }
+        };
+    }
+    // Xử lý popup thông báo
+    const notiBtn = document.getElementById('notification-toggle');
+    const notiPopup = document.getElementById('notification-popup');
+
+    if (notiBtn && notiPopup) {
+        notiBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notiPopup.classList.toggle('active');
+    });
+
+    // Click ra ngoài thì đóng popup
+    document.addEventListener('click', function(e) {
+        if (!notiPopup.contains(e.target) && !notiBtn.contains(e.target)) {
+            notiPopup.classList.remove('active');
+        }
+    });
+}
+    // Xử lý nút "Xem tất cả" trong popup thông báo
+    var viewAllNotiBtn = document.getElementById('viewAllNotiBtn');
+    if (viewAllNotiBtn) {
+        viewAllNotiBtn.onclick = function (event) {
+            event.preventDefault();
+
+            // Đổi src iframe
+            document.getElementById('pageFrame').src = this.getAttribute('href');
+
+            // Cập nhật tiêu đề trang
+            document.getElementById('pageTitle').textContent = 'Thông báo';
+
+            // Đóng popup sau khi bấm
+            const notiPopup = document.getElementById('notification-popup');
+            if (notiPopup) {
+                notiPopup.classList.remove('active');
+            }
+
+            // Cập nhật trạng thái active của menu item
+            for (var j = 0; j < menuItems.length; j++) {
+                menuItems[j].classList.remove('active');
+            }
+
+            // Tìm và active menu item "Thông báo" trong sidebar
+            for (var j = 0; j < menuItems.length; j++) {
+                if (menuItems[j].getAttribute('href') === "{% url 'notify' %}") {
                     menuItems[j].classList.add('active');
                 }
             }

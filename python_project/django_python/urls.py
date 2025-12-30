@@ -20,6 +20,7 @@ urlpatterns = [
     path("home-user/library-rule/", views.library_rule, name="library_rule"),
     path("home-user/library_card/", views.library_card, name="library_card"),
     path("home-user/notify/", views.notify, name="notify"),
+    path("home-user/book_categories/", views.book_categories, name="book_categories"),
 
     path('user/books/', views.user_books_view, name="user_books"),
     path('borrow/request/<int:book_id>/', views.request_borrow, name='request_borrow'),
