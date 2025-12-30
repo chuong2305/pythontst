@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from functools import wraps
+from django.db import transaction
 from .models import Book, Author, Category, Publisher, Account, Borrow
 from django.core.exceptions import ValidationError
 
@@ -48,8 +49,7 @@ def login_view(request):
     return render(request, 'login.html')
 
 
-def welcome_view(request):
-    return render(request, 'welcome.html')
+
 
 
 def user_books_author(request):
@@ -159,30 +159,30 @@ def user_books_view(request):
     })
 
 
-@session_login_required
 @require_POST
-def request_borrow(request, book_id):
+def reserve_book(request, book_id):
     account = _get_current_account(request)
-    if not account:
-        messages.error(request, "Bạn cần đăng nhập.")
-        return redirect('login_view')
-
     book = get_object_or_404(Book, pk=book_id)
-    current_borrowed = Borrow.objects.filter(user=account, status='borrowed').count()
-    pending_count = Borrow.objects.filter(user=account, status='pending').count()
 
-    if current_borrowed + pending_count >= 5:
-        messages.warning(request, "Bạn đã đạt giới hạn 5 cuốn (bao gồm chờ duyệt).")
+    reserved_count = Borrow.objects.filter(
+        book=book,
+        status='reserved'
+    ).count()
+
+    if book.available <= reserved_count:
+        messages.error(
+            request,
+            "Hiện đã có người dùng khác đặt trước."
+        )
         return redirect('user_books_author')
 
-    try:
-        # Lệnh create này sẽ kích hoạt signals.py
-        Borrow.objects.create(user=account, book=book, status='pending')
-        messages.success(request, f"Đã gửi yêu cầu mượn '{book.book_name}'. Vui lòng chờ admin duyệt.")
-    except ValidationError as e:
-        msg_content = e.message if hasattr(e, 'message') else str(e)
-        messages.error(request, msg_content)
+    Borrow.objects.create(
+        user=account,
+        book=book,
+        status='reserved'
+    )
 
+    messages.success(request, "Đặt trước thành công.")
     return redirect('user_books_author')
 
 
@@ -237,33 +237,13 @@ def confirm_return(request, borrow_id):
 @require_POST
 def cancel_pending_borrow(request, borrow_id):
     account = _get_current_account(request)
-    b = get_object_or_404(Borrow, borrow_id=borrow_id, user=account, status='pending')
+    b = get_object_or_404(Borrow, borrow_id=borrow_id, user=account, status='reserved')
     b.delete()
-    messages.success(request, "Đã hủy yêu cầu mượn.")
+    messages.success(request, "Đã hủy đặt trước.")
 
     if request.headers.get('HX-Request'):
         return HttpResponse("")  # Xóa card khỏi giao diện
     return redirect('user_borrowed')
-
-
-@session_login_required
-@require_POST
-def cancel_return_request(request, borrow_id):
-    account = _get_current_account(request)
-    # get_object_or_404 sẽ tự raise 404 nếu không tìm thấy, không cần check if not b
-    b = get_object_or_404(Borrow, borrow_id=borrow_id, user=account, status='await_return')
-
-    b.status = 'borrowed'
-    b.save()
-    messages.success(request, "Đã hủy yêu cầu trả.")
-
-    if request.headers.get('HX-Request'):
-        days_left = calculate_days_left(b)
-        item_context = {'borrow': b, 'days_left': days_left}
-        return render(request, 'partials/borrow_card.html', {'item': item_context})
-
-    return HttpResponseRedirect(reverse('user_borrowed') + '?tab=return')
-
 
 @session_login_required
 @require_POST

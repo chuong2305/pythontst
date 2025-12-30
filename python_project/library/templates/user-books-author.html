@@ -178,7 +178,7 @@
     </div>
 
     <div class="modal-actions">
-      <button class="btn-confirm" id="modalConfirmBorrow">Xác nhận mượn</button>
+      <button class="btn-confirm" id="modalConfirmBorrow">Đặt trước sách</button>
     </div>
   </div>
 </div>
@@ -258,14 +258,8 @@
     document.getElementById('modalConfirmBorrow').addEventListener('click', () => {
       if (!currentBookId) return;
 
-      // 3. THÊM ĐOẠN CHECK SỐ LƯỢNG NÀY
-      if (currentBookAvailable <= 0) {
-          alert("Sách đã hết bạn không thể yêu cầu mượn");
-          return; // Dừng lại, không gửi form
-      }
-
       const form = document.getElementById('borrowRequestForm');
-      form.action = `/borrow/request/${currentBookId}/`; // hoặc {% url 'request_borrow' 0 %} rồi replace 0 bằng id
+      form.action = `/borrow/reserve/${currentBookId}/`;
       form.submit();
     });
 

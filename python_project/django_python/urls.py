@@ -10,7 +10,6 @@ urlpatterns = [
     path('login/', views.custom_login, name='login'),
     path('', views.login_view, name='login_view'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
-    path("home/welcome/", views.welcome_view, name="welcome_view"),
     path('home-user/', views.home_page_user, name='home_page_user'),
 
     path("home-user/user-books-author/", views.user_books_view, name="user_books_author"),
@@ -22,10 +21,9 @@ urlpatterns = [
     path("home-user/notify/", views.notify, name="notify"),
 
     path('user/books/', views.user_books_view, name="user_books"),
-    path('borrow/request/<int:book_id>/', views.request_borrow, name='request_borrow'),
+    path('borrow/reserve/<int:book_id>/', views.reserve_book, name='reserve_book'),
     path('borrow/return/<int:borrow_id>/', views.confirm_return, name='confirm_return'),
     path('borrow/pending/cancel/<int:borrow_id>/', views.cancel_pending_borrow, name='cancel_pending_borrow'),
-    path('borrow/return/cancel/<int:borrow_id>/', views.cancel_return_request, name='cancel_return_request'),
     path('borrow/returned/delete/<int:borrow_id>/', views.delete_returned_borrow, name='delete_returned_borrow'),
 
     path('admin/get-pending/', views.get_pending_requests, name='get_pending_requests'),
