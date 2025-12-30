@@ -299,6 +299,7 @@ body {
   object-fit: cover;
   object-position: center;
   display: block;
+  margin-top:15px;
 }
 .modal-right { margin-left: 20px; }
 .modal-right .modal-line {

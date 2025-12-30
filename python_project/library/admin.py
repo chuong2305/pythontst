@@ -1,6 +1,9 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.html import format_html
+
+
 from .models import Account, Author, Category, Publisher, Book, Borrow
 from datetime import timedelta
 from django.urls import path
@@ -126,11 +129,26 @@ def bump_borrows_version():
 
 @admin.register(Borrow)
 class BorrowAdmin(admin.ModelAdmin):
+    readonly_fields = ("fine",)
     change_list_template = "partials/change_list.html"
     list_display = ("user_display", "user_id_display", "book", "borrow_date", "due_date", "status_display")
     list_filter = ("status",)
     search_fields = ("user__account_name", "book__book_name")
     actions = ["approve_borrow", "approve_return"]
+
+    def save_model(self, request, obj, form, change):
+        if obj.status == 'borrowed':
+            reserved_count = Borrow.objects.filter(
+                book=obj.book,
+                status='reserved'
+            ).exclude(pk=obj.pk).count()
+
+            if obj.book.available <= reserved_count:
+                raise ValidationError(
+                    "Hiện đã có người dùng khác đặt trước."
+                )
+
+        super().save_model(request, obj, form, change)
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
@@ -148,43 +166,20 @@ class BorrowAdmin(admin.ModelAdmin):
         # GET /admin/library/borrow/poll/
         return JsonResponse({"version": get_borrows_version(), "now": timezone.now().isoformat()})
 
-    @admin.action(description="Duyệt yêu cầu mượn")
-    def approve_borrow(self, request, queryset):
-        approved = 0
-        for borrow in queryset.select_related('book').filter(status='pending'):
-            # kiểm tra tồn kho
-            if not borrow.book or borrow.book.available <= 0:
-                continue
-            # cập nhật trạng thái và ngày mượn, hạn trả
-            borrow.status = 'borrowed'
-            borrow.borrow_date = timezone.now().date()
-            borrow.due_date = borrow.borrow_date + timedelta(days=14)
-            # trừ available
-            borrow.book.available -= 1
-            borrow.book.save()
-            borrow.save()
-            approved += 1
-        if approved:
-            bump_borrows_version()
-        self.message_user(request, f"Đã chấp nhận {approved} yêu cầu mượn.")
+    @admin.action(description="Xác nhận mượn sách")
+    def confirm_borrow(self, request, queryset):
+        for b in queryset.filter(status='reserved'):
+            b.status = 'borrowed'
+            b.borrow_date = timezone.now().date()
+            b.due_date = b.borrow_date + timedelta(days=14)
+            b.save()
 
-    @admin.action(description="Xác nhận trả")
-    def approve_return(self, request, queryset):
-        processed = 0
-        for borrow in queryset.select_related('book').filter(status__in=['await_return', 'borrowed']):
-            # cộng lại tồn kho
-            if borrow.book:
-                borrow.book.available += 1
-                borrow.book.save()
-            # chuyển sang đã trả, giữ lịch sử
-            borrow.status = 'returned'
-            borrow.return_date = timezone.now().date()
-            # nếu cần: borrow.calculate_fine()
-            borrow.save()
-            processed += 1
-        if processed:
-            bump_borrows_version()
-        self.message_user(request, "Xác nhận trả thành công.")
+    @admin.action(description="Xác nhận trả sách")
+    def confirm_return(self, request, queryset):
+        for b in queryset.filter(status='borrowed'):
+            b.status = 'returned'
+            b.return_date = timezone.now().date()
+            b.save()
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
