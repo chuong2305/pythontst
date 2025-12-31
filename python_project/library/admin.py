@@ -10,6 +10,14 @@ from django.urls import path
 from django.http import JsonResponse
 from django.core.cache import cache
 
+from django.contrib import admin
+from django.utils.timezone import now
+from datetime import timedelta
+from .models import Borrow
+from datetime import timedelta
+from django.utils import timezone
+
+
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
@@ -24,6 +32,18 @@ class AccountAdmin(admin.ModelAdmin):
             )
         }),
     )
+    change_list_template = "partials/change_list.html"
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+
+        extra_context["stats"] = [
+            {"label": "Tổng người dùng", "value": Account.objects.count()},
+            {"label": "Kích hoạt", "value": Account.objects.filter(status="active").count()},
+            {"label": "Chưa kích hoạt", "value": Account.objects.filter(status="inactive").count()},
+        ]
+
+        return super().changelist_view(request, extra_context=extra_context)
+
 
     def account_id_display(self, obj):
         return obj.pk if obj and obj.pk else "Sẽ được tạo sau khi lưu"
@@ -33,18 +53,66 @@ class AccountAdmin(admin.ModelAdmin):
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ("author_name",)
     search_fields = ("author_name",)
+    change_list_template = "partials/change_list.html"
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        from .models import Author, Book  # Only needed if not imported above
+
+        total_authors = Author.objects.count()
+        authors_with_books = Author.objects.filter(book__isnull=False).distinct().count()
+        authors_without_books = total_authors - authors_with_books
+
+        extra_context["stats"] = [
+            {"label": "Tổng tác giả", "value": total_authors},
+            {"label": "Có sách", "value": authors_with_books},
+            {"label": "Chưa có sách", "value": authors_without_books},
+        ]
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ("category_name",)
     search_fields = ("category_name",)
+    change_list_template = "partials/change_list.html"
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        from .models import Category
+
+        total_categories = Category.objects.count()
+        categories_with_books = Category.objects.filter(books__isnull=False).distinct().count()
+        categories_without_books = total_categories - categories_with_books
+
+        extra_context["stats"] = [
+            {"label": "Tổng thể loại", "value": total_categories},
+            {"label": "Có sách", "value": categories_with_books},
+            {"label": "Chưa có sách", "value": categories_without_books},
+        ]
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(Publisher)
 class PublisherAdmin(admin.ModelAdmin):
     list_display = ("publish_name",)
     search_fields = ("publish_name",)
+    change_list_template = "partials/change_list.html"
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        from .models import Publisher
+
+        total_publishers = Publisher.objects.count()
+        publishers_with_books = Publisher.objects.filter(book__isnull=False).distinct().count()
+        publishers_without_books = total_publishers - publishers_with_books
+
+        extra_context["stats"] = [
+            {"label": "Tổng nhà xuất bản", "value": total_publishers},
+            {"label": "Có sách", "value": publishers_with_books},
+            {"label": "Chưa có sách", "value": publishers_without_books},
+        ]
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(Book)
@@ -67,7 +135,7 @@ class BookAdmin(admin.ModelAdmin):
     filter_horizontal = ("categories",)
     ordering = ("book_name",)
     readonly_fields = ("public_url_display",)
-
+    change_list_template = "partials/change_list.html"
     fieldsets = (
         (None, {
             'fields': (
@@ -106,6 +174,43 @@ class BookAdmin(admin.ModelAdmin):
         return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>', url, url)
 
     public_url_display.short_description = "Public URL"
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        from .models import Book, Borrow
+        from django.utils import timezone
+        from datetime import timedelta
+        from django.db.models import Count
+
+        today = timezone.now().date()
+        recent_days = today - timedelta(days=30)
+
+        total_books = Book.objects.count()
+        available_books = Book.objects.filter(available__gt=0).count()
+        out_of_stock = Book.objects.filter(available=0).count()
+        recent_books = Book.objects.filter(dateAdd__gte=recent_days).count()
+
+        # Find book with most borrows in last 30 days
+        top_borrowed = (
+            Borrow.objects
+            .filter(borrow_date__gte=recent_days)
+            .values('book__book_name')
+            .annotate(times=Count('pk'))
+            .order_by('-times')
+        )
+        if top_borrowed:
+            top_book = top_borrowed[0]
+            top_book_display = f"{top_book['book__book_name']} ({top_book['times']} lượt)"
+        else:
+            top_book_display = "Không có lượt mượn"
+
+        extra_context["stats"] = [
+            {"label": "Tổng số sách", "value": total_books},
+            {"label": "Sách đang có", "value": available_books},
+            {"label": "Sách hết hàng", "value": out_of_stock},
+            {"label": "Sách mới 30 ngày", "value": recent_books},
+            {"label": "Sách mượn nhiều nhất 30 ngày", "value": top_book_display},
+        ]
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 BORROW_VERSION_KEY = "borrows_version"
@@ -152,8 +257,22 @@ class BorrowAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
+
+        today = timezone.now().date()
+        last_30_days = today - timedelta(days=30)
+
+        extra_context["stats"] = [
+            {"label": "Tổng lượt mượn", "value": Borrow.objects.count()},
+            {"label": "30 ngày gần đây", "value": Borrow.objects.filter(borrow_date__gte=last_30_days).count()},
+            {"label": "Đang chờ duyệt", "value": Borrow.objects.filter(status="reserved").count()},
+            {"label": "Đang mượn", "value": Borrow.objects.filter(status="borrowed").count()},
+            {"label": "Đã trả", "value": Borrow.objects.filter(status="returned").count()},
+        ]
+
         extra_context["initial_version"] = get_borrows_version()
         return super().changelist_view(request, extra_context=extra_context)
+
+
 
     def get_urls(self):
         urls = super().get_urls()

@@ -18,7 +18,7 @@
       {% endfor %}
     </div>
   {% endif %}
-
+    
     <!-- TOP: SEARCH SECTION -->
     <div class="top-section">
         <h2 class="section-title">Tìm kiếm sách</h2>
@@ -91,6 +91,43 @@
       <a href="{% url 'user_books_author' %}" class="btn-reset">Làm mới</a>
     </div>
   </form>
+  {% if recommended_books %}
+<div class="recommend-section">
+    <h2 class="section-title">📚 Gợi ý dành cho bạn</h2>
+
+    <div class="book-display recommended">
+        {% for b in recommended_books %}
+        <div class="book-card"
+             data-id="{{ b.pk }}"
+             data-available="{{ b.available }}"
+             data-title="{{ b.book_name }}"
+             data-author="{{ b.author.author_name }}"
+             data-categories="{% for c in b.categories.all %}{{ c.category_name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+             data-publisher="{{ b.publisher.publish_name }}"
+             data-year="{{ b.publishYear|default:'-' }}"
+             data-date="{{ b.dateAdd }}"
+             data-status="{% if b.available > 0 %}Còn trống ({{ b.available }}){% else %}Đã được mượn{% endif %}"
+             data-description="{{ b.description|default_if_none:''|escape }}"
+             data-image="{% if b.image %}{{ b.image.url }}{% endif %}">
+            
+            <div class="book-img">
+                {% if b.image %}
+                    <img src="{{ b.image.url }}" alt="{{ b.book_name }}">
+                {% else %}
+                    <div class="img-placeholder">Không có ảnh</div>
+                {% endif %}
+            </div>
+
+            <div class="book-info">
+                <h3 class="book-title">{{ b.book_name }}</h3>
+                <p class="book-author">Tác giả: {{ b.author.author_name }}</p>
+                <p class="book-publisher">NXB: {{ b.publisher.publish_name }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 
     <!-- BOTTOM: BOOK DISPLAY (HIỂN THỊ TOÀN BỘ SÁCH) -->
     <div class="bottom-section">

@@ -7,9 +7,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from functools import wraps
 from django.db import transaction
-from .models import Book, Author, Category, Publisher, Account, Borrow
+from .models import Book, Author, Category, Publisher, Account, Borrow, BookAssociationRule
 from django.core.exceptions import ValidationError
-
+from .recommendation import RecommendationService
 
 # --- HELPER FUNCTIONS ---
 
@@ -145,9 +145,19 @@ def user_books_view(request):
         books = books.filter(available=0)
 
     books = books.distinct()
+    
+    # =========================
+    # RECOMMENDED BOOKS
+    # =========================
+    account = _get_current_account(request)
+    if account:
+        recommended_books = RecommendationService.get_recommendations_for_user(account, limit=6)
+    else:
+        recommended_books = []
 
     return render(request, "user-books-author.html", {
         "books": books,
+        "recommended_books": recommended_books,
         "authors": Author.objects.all().order_by("author_name"),
         "categories": Category.objects.all().order_by("category_name"),
         "publishers": Publisher.objects.all().order_by("publish_name"),

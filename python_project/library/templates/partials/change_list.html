@@ -1,5 +1,74 @@
 {% extends "admin/change_list.html" %}
 {% block content %}
+{% if stats %}
+<style>
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat({{ stats|length }}, 1fr);
+    gap: 22px;
+    margin-bottom: 26px;
+    background: linear-gradient(90deg, #F8FAFC 40%, #F0F9FF 100%);
+    padding: 16px 16px;
+    border-radius: 18px;
+    box-shadow: 0 4px 40px 0 rgba(50,50,93,0.06), 0 1.5px 3px 0 rgba(0,0,0,0.04);
+}
+
+.admin-stats .stat {
+    background: linear-gradient(135deg, #e0ecff 0%, #fff 80%);
+    border-radius: 14px;
+    padding: 20px 18px;
+    box-shadow: 0 2px 16px 0 rgba(40,130,255,0.07), 0 1px 2px 0 rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    /* Optional: add glass effect */
+    backdrop-filter: blur(2px);
+    transition: box-shadow 0.15s, transform 0.17s;
+}
+.admin-stats .stat:hover {
+    box-shadow: 0 6px 28px 0 rgba(40,130,255,0.13), 0 2px 4px 0 rgba(0,0,0,0.07);
+    transform: translateY(-2px) scale(1.025);
+}
+
+.admin-stats .label {
+    font-size: 15px;
+    color: #367aff;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    margin-bottom: 3px;
+    /* emoji or icon area can go here if you want */
+}
+.admin-stats .value {
+    font-size: 26px;
+    font-weight: 700;
+    margin-top: 6px;
+    color: #184da7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    display: block;
+}
+
+@media (max-width: 650px) {
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="admin-stats">
+    {% for s in stats %}
+        <div class="stat" title="{{ s.value }}">
+            <div class="label">{{ s.label }}</div>
+            <div class="value">{{ s.value }}</div>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
   {{ block.super }}
   <script>
     (function () {
