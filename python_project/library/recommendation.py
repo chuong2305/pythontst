@@ -16,9 +16,7 @@ class RecommendationService:
         self.min_lift = min_lift
     
     def _get_monthly_baskets(self):
-        borrows = Borrow.objects.filter(
-            status__in=['borrowed', 'returned', 'await_return']
-        ).select_related('user', 'book').order_by('user', 'borrow_date')
+        borrows = Borrow.objects.select_related('user', 'book').order_by('user', 'borrow_date')
 
         baskets = defaultdict(set)
         
@@ -127,8 +125,26 @@ class RecommendationService:
             antecedent_book_id=book_id
         ).select_related('consequent_book').order_by('-lift', '-confidence')[:limit]
         
-        recommended_books = [rule.consequent_book for rule in rules]
-        return recommended_books
+        rec_books = [rule.consequent_book for rule in rules]
+        
+        if rec_books:
+            return rec_books
+
+        # Fallback: Suggest books from the same category
+        try:
+            book = Book.objects.get(pk=book_id)
+            similar_books = (
+                Book.objects.filter(categories__in=book.categories.all())
+                .exclude(book_id=book_id)
+                .distinct()[:limit]
+            )
+            if similar_books.exists():
+                return list(similar_books)
+        except Book.DoesNotExist:
+            pass
+        
+        # Fallback: Suggest popular books
+        return RecommendationService.get_popular_books(limit=limit)
     
     @staticmethod
     def get_recommendations_for_user(account, limit=10):
@@ -141,7 +157,8 @@ class RecommendationService:
         )
         
         if not borrowed_book_ids: 
-            return []
+            # fallback: suggest most popular books
+            return RecommendationService.get_popular_books(limit=limit)
 
         rules = BookAssociationRule.objects.filter(
             antecedent_book_id__in=borrowed_book_ids
@@ -168,8 +185,14 @@ class RecommendationService:
             key=lambda x: x['score'],
             reverse=True
         )[:limit]
-        
-        return [item['book'] for item in sorted_recommendations]
+
+        rec_books = [item['book'] for item in sorted_recommendations if item['book']]
+
+        if not rec_books:
+            # Fallback if no rules match
+            return RecommendationService.get_popular_books(limit=limit)
+
+        return rec_books
     
     @staticmethod
     def get_popular_books(limit=10):
