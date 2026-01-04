@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang người dùng - Thư viện</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}?v={{ timestamp }}">
@@ -12,7 +13,6 @@
 <body class="home-user-page">
 <div class="wrapper">
 
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <span class="material-symbols-outlined header-brand-icon">local_library</span>
@@ -24,15 +24,12 @@
                 </li>
                 <li><a href="{% url 'user_borrowed' %}" class="menu-item"><i class="fas fa-hand-holding"></i> <span>Sách đang mượn</span></a>
                 </li>
-                <li><a href="{% url 'book_categories' %}" class="menu-item"><i class="fa-solid fa-layer-group"></i> <span>Thể loại sách</span></a>
-                </li>
                 <li><a href="{% url 'library_rule' %}" class="menu-item"><i class="fa-solid fa-book"></i> <span>Nội quy thư viện</span></a>
                 </li>
             </ul>
         </nav>
     </aside>
 
-    <!-- Main -->
     <main class="main-content" id="main">
 
         <header class="topbar">
@@ -95,26 +92,21 @@
             <iframe src="{% url 'user_books_author' %}" id="pageFrame" frameborder="0"></iframe>
 
         </div>
-        
 
     </main>
 
 </div>
 
 <script>
-    // Chuyển trang trong iframe
     var menuItems = document.getElementsByClassName('menu-item');
     for (var i = 0; i < menuItems.length; i++) {
         menuItems[i].onclick = function (event) {
             event.preventDefault();
 
-            // Đổi src iframe
             document.getElementById('pageFrame').src = this.getAttribute('href');
 
-            // Cập nhật tiêu đề trang
             document.getElementById('pageTitle').textContent = this.textContent.trim();
 
-            // Đổi trạng thái active
             for (var j = 0; j < menuItems.length; j++) {
                 menuItems[j].classList.remove('active');
             }
@@ -122,23 +114,18 @@
         };
     }
 
-    // Xử lý nút Hồ Sơ trong dropdown
     var profileBtn = document.getElementById('profileBtn');
     if (profileBtn) {
         profileBtn.onclick = function (event) {
             event.preventDefault();
 
-            // Đổi src iframe
             document.getElementById('pageFrame').src = this.getAttribute('href');
 
-            // Cập nhật tiêu đề trang
             document.getElementById('pageTitle').textContent = 'Thẻ thư viện';
 
-            // Cập nhật trạng thái active của menu item
             for (var j = 0; j < menuItems.length; j++) {
                 menuItems[j].classList.remove('active');
             }
-            // Tìm và active menu item "Thẻ thư viện"
             for (var j = 0; j < menuItems.length; j++) {
                 if (menuItems[j].getAttribute('href') === "{% url 'library_card' %}") {
                     menuItems[j].classList.add('active');
@@ -146,7 +133,6 @@
             }
         };
     }
-    // Xử lý popup thông báo
     const notiBtn = document.getElementById('notification-toggle');
     const notiPopup = document.getElementById('notification-popup');
 
@@ -156,37 +142,30 @@
             notiPopup.classList.toggle('active');
     });
 
-    // Click ra ngoài thì đóng popup
     document.addEventListener('click', function(e) {
         if (!notiPopup.contains(e.target) && !notiBtn.contains(e.target)) {
             notiPopup.classList.remove('active');
         }
     });
 }
-    // Xử lý nút "Xem tất cả" trong popup thông báo
     var viewAllNotiBtn = document.getElementById('viewAllNotiBtn');
     if (viewAllNotiBtn) {
         viewAllNotiBtn.onclick = function (event) {
             event.preventDefault();
 
-            // Đổi src iframe
             document.getElementById('pageFrame').src = this.getAttribute('href');
 
-            // Cập nhật tiêu đề trang
             document.getElementById('pageTitle').textContent = 'Thông báo';
 
-            // Đóng popup sau khi bấm
             const notiPopup = document.getElementById('notification-popup');
             if (notiPopup) {
                 notiPopup.classList.remove('active');
             }
 
-            // Cập nhật trạng thái active của menu item
             for (var j = 0; j < menuItems.length; j++) {
                 menuItems[j].classList.remove('active');
             }
 
-            // Tìm và active menu item "Thông báo" trong sidebar
             for (var j = 0; j < menuItems.length; j++) {
                 if (menuItems[j].getAttribute('href') === "{% url 'notify' %}") {
                     menuItems[j].classList.add('active');
@@ -194,6 +173,7 @@
             }
         };
     }
+
 </script>
 </body>
 </html>
