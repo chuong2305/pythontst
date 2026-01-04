@@ -7,21 +7,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lịch sử mượn trả</title>
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
-  <!-- Styles -->
   <link rel="stylesheet" href="{% static 'css/borrowed-history.css' %}?v={{ timestamp }}" />
 </head>
 
 <body>
   <div class="app-container">
     <div class="app-wrapper">
-      <!-- ===== Main Content ===== -->
       <div class="app-content">
-        <!-- ===== Sidebar ===== -->
-        <!-- ===== Main ===== -->
         <main class="history-main">
           <div class="history-header">
             <h2 class="history-title">Lịch sử mượn trả</h2>
@@ -134,24 +129,25 @@
     const notificationToggle = document.getElementById('notification-toggle');
     const notificationPopup = document.getElementById('notification-popup');
 
-    notificationToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      notificationPopup.classList.toggle('active');
-    });
+    if (notificationToggle && notificationPopup) {
+        notificationToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          notificationPopup.classList.toggle('active');
+        });
 
-    document.addEventListener('click', (e) => {
-      if (!notificationToggle.contains(e.target) && !notificationPopup.contains(e.target)) {
-        notificationPopup.classList.remove('active');
-      }
-    });
+        document.addEventListener('click', (e) => {
+          if (!notificationToggle.contains(e.target) && !notificationPopup.contains(e.target)) {
+            notificationPopup.classList.remove('active');
+          }
+        });
 
-    const notificationItems = notificationPopup.querySelectorAll('.notification-popup-item');
-    notificationItems.forEach(item => {
-      item.addEventListener('click', () => {
-        notificationPopup.classList.remove('active');
-      });
-    });
+        const notificationItems = notificationPopup.querySelectorAll('.notification-popup-item');
+        notificationItems.forEach(item => {
+          item.addEventListener('click', () => {
+            notificationPopup.classList.remove('active');
+          });
+        });
+    }
   </script>
 </body>
-
 </html>

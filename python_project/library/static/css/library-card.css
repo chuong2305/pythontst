@@ -1,11 +1,9 @@
-/* Reset cơ bản */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Body nền xám nhạt */
 body {
     background-color: #f3f4f6;
     font-family: "Inter", sans-serif;
@@ -16,89 +14,86 @@ body {
     color: #111827;
 }
 
-/* Container thẻ thư viện */
 .library-card {
-    background-color: #ffffff; /* Nền trắng */
-    border: 1px solid #e5e7eb; /* Viền xám nhạt */
-    border-radius: 12px; /* Bo góc lớn */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Bóng đổ nhẹ */
-    max-width: 600px; /* Chiều rộng tối đa */
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
     width: 100%;
     padding: 20px;
-    transition: transform 0.2s ease; /* Hiệu ứng hover */
+    transition: transform 0.2s ease;
 }
 
 .library-card:hover {
-    transform: translateY(-5px); /* Nâng lên khi hover */
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15); /* Bóng lớn hơn */
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Header thẻ */
 .card-header {
     display: flex;
     align-items: center;
-    gap: 15px; /* Khoảng cách giữa avatar và title */
+    gap: 15px;
     margin-bottom: 20px;
-    border-bottom: 2px solid #2563eb; /* Viền dưới xanh dương */
+    border-bottom: 2px solid #2563eb;
     padding-bottom: 15px;
 }
 
 .avatar {
-    width: 60px; /* Kích thước avatar */
+    width: 60px;
     height: 60px;
-    border-radius: 50%; /* Bo tròn */
-    border: 3px solid #2563eb; /* Viền xanh dương */
-    object-fit: cover; /* Giữ tỷ lệ ảnh */
+    border-radius: 50%;
+    border: 3px solid #2563eb;
+    object-fit: cover;
 }
 
 .card-title {
-    font-size: 1.5rem; /* Kích thước chữ lớn */
-    font-weight: 700; /* Chữ đậm */
-    color: #2563eb; /* Màu xanh dương */
-    text-transform: uppercase; /* Chữ hoa */
-    letter-spacing: 1px; /* Khoảng cách chữ */
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* Thông tin thẻ */
 .card-info {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Khoảng cách giữa các dòng */
+    gap: 10px;
 }
 
 .card-text {
-    font-size: 1rem; /* Kích thước chữ */
-    color: #6b7280; /* Màu xám */
-    line-height: 1.5; /* Chiều cao dòng */
+    font-size: 1rem;
+    color: #6b7280;
+    line-height: 1.5;
     display: flex;
-    gap: 8px; /* Khoảng cách giữa label và giá trị */
+    gap: 8px;
 }
 
 .card-text strong {
-    color: #111827; /* Màu đen cho label */
-    font-weight: 600; /* Chữ đậm nhẹ */
+    color: #111827;
+    font-weight: 600;
 }
 
-/* Responsive cho mobile */
 @media (max-width: 480px) {
     .library-card {
         padding: 15px;
-        max-width: 90%; /* Thu nhỏ trên màn hình nhỏ */
+        max-width: 90%;
     }
     .card-header {
-        flex-direction: column; /* Xếp dọc */
+        flex-direction: column;
         text-align: center;
         gap: 10px;
     }
     .card-title {
-        font-size: 1.25rem; /* Chữ nhỏ hơn */
+        font-size: 1.25rem;
     }
     .card-text {
-        flex-direction: column; /* Xếp dọc */
+        flex-direction: column;
         gap: 5px;
     }
 }
+
 .status-active {
-        color: #28a745; /* Mã màu xanh lá chuẩn (Success) */
-        font-weight: bold; /* Làm đậm để dễ nhìn hơn */
-    }
+    color: #28a745;
+    font-weight: bold;
+}

@@ -1,4 +1,3 @@
-
 * {
     box-sizing: border-box; /* Đặt box-sizing cho tất cả phần tử để bao gồm padding và border trong width/height */
     font-family: "Inter", sans-serif; /* Font chữ Inter cho toàn bộ trang */
@@ -6,7 +5,7 @@
 
 body {
     background-color: #f3f4f6; /* Màu nền xám nhạt cho toàn bộ trang */
-    font-family: 'Inter', system-ui, -apple-system, sans-serif; /* Font chữ chính, ưu tiên Inter, sau đó fallback */
+    font-family: "Inter", sans-serif; /* Font chữ chính, ưu tiên Inter, sau đó fallback */
     margin: 0; /* Loại bỏ margin mặc định của body */
     line-height: 1.5; /* Chiều cao dòng chữ để dễ đọc */
     color: #111827; /* Màu chữ đen chính */
@@ -86,7 +85,7 @@ html.dark .rules-search {
     outline: none; /* Loại bỏ outline mặc định */
     margin-left: 2.5rem; /* Khoảng cách từ icon */
     color: #111827; /* Màu chữ */
-    font-family: 'Inter', system-ui, -apple-system, sans-serif; /* Font giống body */
+    font-family: "Inter", sans-serif; /* Font giống body */
     font-size: 1rem; /* Kích thước chữ */
 }
 
