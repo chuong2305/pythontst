@@ -19,7 +19,6 @@
     </div>
   {% endif %}
     
-    <!-- TOP: SEARCH SECTION -->
     <div class="top-section">
         <h2 class="section-title">Tìm kiếm sách</h2>
         <form method="get" class="search-row">
@@ -29,7 +28,6 @@
         </form>
     </div>
 
-    <!-- MIDDLE: FILTER SECTION -->
     <form method="get" class="middle-section">
     <div class="filter-group">
       <label>Thể loại</label>
@@ -84,13 +82,12 @@
       </select>
     </div>
 
-    <!-- Nút áp dụng lọc -->
     <div class="filter-actions">
       <button type="submit" class="btn-apply">Áp dụng</button>
-      <!-- tùy chọn: nút xóa lọc -->
       <a href="{% url 'user_books_author' %}" class="btn-reset">Làm mới</a>
     </div>
   </form>
+
   {% if recommended_books %}
 <div class="recommend-section">
     <h2 class="section-title">📚 Gợi ý dành cho bạn</h2>
@@ -109,7 +106,7 @@
              data-status="{% if b.available > 0 %}Còn trống ({{ b.available }}){% else %}Đã được mượn{% endif %}"
              data-description="{{ b.description|default_if_none:''|escape }}"
              data-image="{% if b.image %}{{ b.image.url }}{% endif %}">
-            
+
             <div class="book-img">
                 {% if b.image %}
                     <img src="{{ b.image.url }}" alt="{{ b.book_name }}">
@@ -120,8 +117,16 @@
 
             <div class="book-info">
                 <h3 class="book-title">{{ b.book_name }}</h3>
-                <p class="book-author">Tác giả: {{ b.author.author_name }}</p>
-                <p class="book-publisher">NXB: {{ b.publisher.publish_name }}</p>
+                <p class="book-categories">
+                    {% for c in b.categories.all %}
+                        {{ c.category_name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                {% if b.available > 0 %}
+                    <p class="book-status available">Số lượng: {{ b.available }}</p>
+                {% else %}
+                    <p class="book-status borrowed">Hết sách</p>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
@@ -129,7 +134,6 @@
 </div>
 {% endif %}
 
-    <!-- BOTTOM: BOOK DISPLAY (HIỂN THỊ TOÀN BỘ SÁCH) -->
     <div class="bottom-section">
         <h2 class="section-title">Danh sách sách</h2>
 
@@ -156,9 +160,7 @@
         </div>
         <div class="book-info">
           <h3 class="book-title">{{ b.book_name }}</h3>
-          <p class="book-author">Tác giả: {{ b.author.author_name }}</p>
           <p class="book-categories">
-            Thể loại:
             {% with cats=b.categories.all %}
               {% if cats %}
                 {% for c in cats %}
@@ -167,13 +169,10 @@
               {% else %}-{% endif %}
             {% endwith %}
           </p>
-          <p class="book-publisher">NXB: {{ b.publisher.publish_name }}</p>
-          <p class="book-year">Năm XB: {{ b.publishYear|default:"-" }}</p>
-          <p class="book-date">Ngày nhập: {{ b.dateAdd }}</p>
           {% if b.available > 0 %}
-            <p class="book-status available">Số lượng: {{ b.available }} cuốn</p>
+            <p class="book-status available">Số lượng: {{ b.available }}</p>
           {% else %}
-            <p class="book-status borrowed">Số lượng: đã hết sách</p>
+            <p class="book-status borrowed">Hết sách</p>
           {% endif %}
         </div>
       </div>
@@ -185,7 +184,7 @@
     </div>
 
 </div>
-<!-- Modal chi tiết sách -->
+
 <div class="book-modal-backdrop" id="bookModalBackdrop" aria-hidden="true">
   <div class="book-modal" role="dialog" aria-modal="true" aria-labelledby="bookModalTitle">
     <button class="modal-close" id="bookModalClose" aria-label="Đóng">×</button>
@@ -235,8 +234,8 @@
     const statusEl = document.getElementById('modalBookStatus');
     const descEl = document.getElementById('modalBookDesc');
 
-    let currentBookId = null; // LƯU BOOK ID ĐANG XEM
-    let currentBookAvailable = 0; // 1. THÊM BIẾN NÀY ĐỂ LƯU SỐ LƯỢNG
+    let currentBookId = null;
+    let currentBookAvailable = 0;
 
     function openModal(data) {
       nameEl.textContent = data.title || '';
@@ -263,7 +262,7 @@
     function closeModal() {
       backdrop.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
-      currentBookId = null; // reset
+      currentBookId = null;
     }
 
     closeBtn.addEventListener('click', closeModal);
@@ -271,7 +270,6 @@
       if (e.target === backdrop) closeModal();
     });
 
-    // Gắn click cho từng card
     document.querySelectorAll('.book-card').forEach(card => {
       card.addEventListener('click', () => {
         const data = {
@@ -285,13 +283,12 @@
           description: card.dataset.description,
           image: card.dataset.image
         };
-        currentBookId = card.dataset.id; // LẤY ID
-        currentBookAvailable = parseInt(card.dataset.available); // 2. LẤY SỐ LƯỢNG TỪ DATA-ATTRIBUTE
+        currentBookId = card.dataset.id;
+        currentBookAvailable = parseInt(card.dataset.available);
         openModal(data);
       });
     });
 
-    // Submit form POST đến request_borrow
     document.getElementById('modalConfirmBorrow').addEventListener('click', () => {
       if (!currentBookId) return;
 
@@ -314,7 +311,6 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         {% for message in messages %}
-            // Xác định loại icon dựa trên tags của message (error/success/warning)
             var type = "{{ message.tags }}";
             var icon = "info";
             var title = "Thông báo";
@@ -330,11 +326,10 @@
                 title = "Cảnh báo";
             }
 
-            // Hiển thị Popup
             Swal.fire({
                 icon: icon,
                 title: title,
-                text: "{{ message|escapejs }}", // Nội dung lỗi từ views/signals sẽ hiện ở đây
+                text: "{{ message|escapejs }}",
                 confirmButtonText: 'Đã hiểu',
                 confirmButtonColor: '#3085d6'
             });
