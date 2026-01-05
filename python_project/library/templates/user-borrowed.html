@@ -20,31 +20,39 @@
       </form>
 
       <div class="tabs">
+        <button type="button" class="tab" data-tab="reserved">Sách đã đặt trước</button>
         <button type="button" class="tab" data-tab="return">Đã mượn</button>
         <button type="button" class="tab" data-tab="returned">Đã trả</button>
         <span class="has-rent">Đã mượn {{ current_borrowed_count }} / {{ limit }} cuốn sách</span>
       </div>
 
-        <div class="tab-content" id="return">
+      <div class="tab-content" id="reserved">
+        <div id="reserved-borrow-container"
+             hx-get="{% url 'get_user_reserved_books' %}"
+             hx-trigger="load, every 2s">
+             <p style="text-align:center; padding: 20px;">Đang tải danh sách đặt trước...</p>
+        </div>
+      </div>
+
+      <div class="tab-content" id="return">
         <div id="active-borrow-container"
              hx-get="{% url 'get_user_active_borrows' %}"
              hx-trigger="load, every 2s">
-
              <p style="text-align:center; padding: 20px;">Đang cập nhật dữ liệu...</p>
         </div>
       </div>
 
-        <div class="tab-content" id="returned">
-            <div id="returned-borrow-container"
-                 hx-get="{% url 'get_user_returned_history' %}"
-                 hx-trigger="load, every 2s">
-
-                <p style="text-align:center; padding: 20px;">Đang tải lịch sử...</p>
-            </div>
+      <div class="tab-content" id="returned">
+        <div id="returned-borrow-container"
+             hx-get="{% url 'get_user_returned_history' %}"
+             hx-trigger="load, every 2s">
+            <p style="text-align:center; padding: 20px;">Đang tải lịch sử...</p>
         </div>
+      </div>
 
-    </div> <script>
-      // Chuyển tab
+    </div>
+
+    <script>
       document.addEventListener('DOMContentLoaded', () => {
         const tabs = document.querySelectorAll('.tab')
         const contents = document.querySelectorAll('.tab-content')
@@ -52,18 +60,24 @@
         function showTab(tabId) {
           tabs.forEach((t) => t.classList.remove('active'))
           contents.forEach((c) => (c.style.display = 'none'))
+
           const tabBtn = document.querySelector(`.tab[data-tab="${tabId}"]`)
           const content = document.getElementById(tabId)
+
           if (tabBtn) tabBtn.classList.add('active')
           if (content) content.style.display = 'block'
         }
 
-        // Đọc tham số tab từ URL
         const params = new URLSearchParams(window.location.search)
         const tabParam = params.get('tab')
 
-        // Nếu có ?tab=returned thì mở tab 'returned', ngược lại mặc định 'return'
-        showTab(tabParam === 'returned' ? 'returned' : 'return')
+        if (tabParam === 'returned') {
+            showTab('returned');
+        } else if (tabParam === 'return') {
+            showTab('return');
+        } else {
+            showTab('reserved');
+        }
 
         tabs.forEach((tab) => {
           tab.addEventListener('click', () => showTab(tab.dataset.tab))

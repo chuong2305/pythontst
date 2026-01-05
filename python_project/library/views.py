@@ -11,6 +11,7 @@ from .models import Book, Author, Category, Publisher, Account, Borrow, BookAsso
 from django.core.exceptions import ValidationError
 from .recommendation import RecommendationService
 
+
 # --- HELPER FUNCTIONS ---
 
 def _get_current_account(request):
@@ -39,17 +40,12 @@ def session_login_required(view_func):
     return _wrapped
 
 
-# --- VIEW CƠ BẢN ---
-
 def home_page_user(request):
     return render(request, 'home-page-user.html')
 
 
 def login_view(request):
     return render(request, 'login.html')
-
-
-
 
 
 def user_books_author(request):
@@ -70,6 +66,7 @@ def library_rule(request):
 
 def library_card(request):
     return render(request, 'library_card.html')
+
 
 @session_login_required
 def notify(request):
@@ -143,7 +140,7 @@ def user_books_view(request):
         books = books.filter(available=0)
 
     books = books.distinct()
-    
+
     # =========================
     # RECOMMENDED BOOKS
     # =========================
@@ -206,16 +203,15 @@ def user_borrowed(request):
     # Chỉ cần đếm số lượng để hiển thị badge trên Tab (Ví dụ: Đã mượn 3/5)
     current_borrowed_count = Borrow.objects.filter(user=account, status='borrowed').count()
 
-    # TRẢ VỀ RỖNG các danh sách items.
-    # Lý do: Bên file HTML, các thẻ div đã có hx-trigger="load"
-    # nên nó sẽ tự động gọi 2 hàm dưới để lấy dữ liệu ngay lập tức.
     return render(request, 'user-borrowed.html', {
         'current_borrowed_count': current_borrowed_count,
         'limit': 5,
-        'items': [],           # Để rỗng, HTMX sẽ tự điền
-        'returned_items': [],  # Để rỗng, HTMX sẽ tự điền
+        'items': [],
+        'returned_items': [],
+        'reserved_items': [],
         'is_empty_active': False,
         'is_empty_returned': False,
+        'is_empty_reserved': False,
     })
 
 
@@ -245,14 +241,17 @@ def confirm_return(request, borrow_id):
 @session_login_required
 @require_POST
 def cancel_pending_borrow(request, borrow_id):
+    # Hàm này dùng chung cho Hủy 'Pending' và Hủy 'Reserved'
     account = _get_current_account(request)
-    b = get_object_or_404(Borrow, borrow_id=borrow_id, user=account, status='reserved')
+    # Tìm borrow có status là reserved hoặc pending
+    b = get_object_or_404(Borrow, borrow_id=borrow_id, user=account, status__in=['reserved', 'pending'])
     b.delete()
-    messages.success(request, "Đã hủy đặt trước.")
+    messages.success(request, "Đã hủy yêu cầu.")
 
     if request.headers.get('HX-Request'):
         return HttpResponse("")  # Xóa card khỏi giao diện
     return redirect('user_borrowed')
+
 
 @session_login_required
 @require_POST
@@ -288,8 +287,6 @@ def get_pending_requests(request):
         'pending_count': pending.count()
     })
 
-# Trong views.py
-
 # ... (các hàm cũ giữ nguyên) ...
 
 @session_login_required
@@ -299,12 +296,12 @@ def get_user_active_borrows(request):
     """
     account = _get_current_account(request)
     if not account:
-        return HttpResponse("") # Trả về rỗng nếu chưa đăng nhập
+        return HttpResponse("")  # Trả về rỗng nếu chưa đăng nhập
 
     # Lấy danh sách Active (Pending + Borrowed) y hệt như view chính
     borrows_active = (Borrow.objects
                       .select_related('book', 'book__author')
-                      .filter(user=account, status__in=['pending','borrowed'])
+                      .filter(user=account, status__in=['pending', 'borrowed'])
                       .order_by('-borrow_date', '-borrow_id'))
 
     active_items = []
@@ -318,9 +315,6 @@ def get_user_active_borrows(request):
         'items': active_items,
         'is_empty_active': len(active_items) == 0,
     })
-
-
-# views.py
 
 @session_login_required
 def get_user_returned_history(request):
@@ -344,3 +338,22 @@ def get_user_returned_history(request):
         'is_empty_returned': len(returned_items) == 0,
     })
 
+
+@session_login_required
+def get_user_reserved_books(request):
+
+    account = _get_current_account(request)
+    if not account: return HttpResponse("")
+    # Lấy danh sách Reserved
+    borrows_reserved = (Borrow.objects
+                        .select_related('book', 'book__author')
+                        .filter(user=account, status='reserved')
+                        .order_by('-borrow_date'))
+
+    # Đóng gói dữ liệu
+    reserved_items = [{'borrow': b} for b in borrows_reserved]
+
+    return render(request, 'partials/user_reserved_list.html', {
+        'reserved_items': reserved_items,
+        'is_empty_reserved': len(reserved_items) == 0,
+    })
