@@ -6,6 +6,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home-page-user.css' %}?v={{ timestamp }}">
     <link rel="stylesheet" href="{% static 'css/notify.css' %}?v={{ timestamp }}"/>
+    <style>
+        .notify-fine {
+            margin-top: 8px;
+            padding: 8px;
+            background-color: #fff1f2;
+            border: 1px solid #fecdd3;
+            border-radius: 6px;
+            color: #be123c;
+            font-size: 0.9rem;
+        }
+        .notify-success {
+            color: #15803d;
+            font-weight: 600;
+        }
+        .notify-warning {
+            margin-top: 8px;
+            padding: 10px;
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            color: #b45309;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body>
 <div class="notify-container">
@@ -18,17 +42,59 @@
             </div>
 
             <div class="notify-info">
-                {% if n.status == 'borrowed' %}
-                    Admin đã <strong>chấp nhận</strong> yêu cầu mượn cuốn sách <strong>"{{ n.book.book_name }}"</strong> của bạn.
+                {% if n.days_until_due == 1 %}
+                    <div class="notify-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Nhắc nhở: Cuốn sách <strong>"{{ n.book.book_name }}"</strong> sắp đến hạn trả (Còn 1 ngày).
+                        <div style="margin-top: 4px; font-size: 0.9em; color: #92400e;">
+                            Hạn trả: <strong>{{ n.due_date|date:"d/m/Y" }}</strong>. Vui lòng trả sách đúng hạn để tránh phát sinh phí phạt.
+                        </div>
+                    </div>
+
+                {% elif n.status == 'borrowed' %}
+                    <div>
+                        <i class="fas fa-check-circle" style="color: #2563eb;"></i>
+                        Admin đã <strong>chấp nhận</strong> yêu cầu mượn cuốn sách <strong>"{{ n.book.book_name }}"</strong> của bạn.
+                    </div>
+                    <div style="margin-top: 4px; font-size: 0.9em; color: #555;">
+                        Hạn trả: <strong>{{ n.due_date|date:"d/m/Y" }}</strong>
+                    </div>
+
                 {% elif n.status == 'returned' %}
-                    Admin đã <strong>xác nhận</strong> bạn đã trả cuốn sách <strong>"{{ n.book.book_name }}"</strong> thành công.
+                    <div>
+                        <i class="fas fa-undo" style="color: #059669;"></i>
+                        Admin đã <strong>xác nhận</strong> bạn đã trả cuốn sách <strong>"{{ n.book.book_name }}"</strong> thành công.
+                    </div>
+
+                    {% if n.fine > 0 or n.damage_status != 'none' %}
+                        <div class="notify-fine">
+                            <strong><i class="fas fa-exclamation-triangle"></i> Chi tiết trả sách:</strong>
+                            <ul style="margin: 4px 0 0 20px; padding: 0;">
+                                {% if n.damage_status != 'none' %}
+                                    <li>Tình trạng: {{ n.get_damage_status_display }}</li>
+                                {% endif %}
+                                {% if n.fine > 0 %}
+                                    <li>Phí phát sinh (Trễ hạn/Hư hại): <strong>{{ n.fine }} VNĐ</strong></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% else %}
+                        <div class="notify-success" style="margin-top: 5px;">
+                            <i class="fas fa-star"></i> Trả sách đúng hạn, không hư hại.
+                        </div>
+                    {% endif %}
                 {% endif %}
-                <br>
-                <small style="color: gray;">{{ n.borrow_date|date:"d/m/Y" }}</small>
+
+                <div style="margin-top: 8px;">
+                    <small style="color: gray;">Ngày cập nhật: {{ n.borrow_date|date:"d/m/Y" }}</small>
+                </div>
             </div>
         </div>
     {% empty %}
-        <div style="text-align: center; padding: 20px;">Bạn chưa có thông báo nào.</div>
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <i class="far fa-bell-slash" style="font-size: 48px; margin-bottom: 10px; display:block;"></i>
+            Bạn chưa có thông báo nào.
+        </div>
     {% endfor %}
 </div>
 </body>

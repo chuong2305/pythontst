@@ -29,6 +29,7 @@ urlpatterns = [
     path('admin/get-pending/', views.get_pending_requests, name='get_pending_requests'),
     path('user/get-active-borrows/', views.get_user_active_borrows, name='get_user_active_borrows'),
     path('user/get-returned-history/', views.get_user_returned_history, name='get_user_returned_history'),
+    path('user/get-reserved-books/', views.get_user_reserved_books, name='get_user_reserved_books'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

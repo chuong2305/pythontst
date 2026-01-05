@@ -1,0 +1,41 @@
+{% if is_empty_reserved %}
+    <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+        <i class="fas fa-bookmark" style="font-size: 48px; margin-bottom: 16px; color: #cbd5e1;"></i>
+        <p>Bạn chưa đặt trước cuốn sách nào.</p>
+    </div>
+{% else %}
+    {% for item in reserved_items %}
+    <div class="borrow-card">
+        <div class="borrow-thumb">
+            {% if item.borrow.book.image %}
+                <img src="{{ item.borrow.book.image.url }}" alt="{{ item.borrow.book.book_name }}">
+            {% else %}
+                <div class="borrow-thumb-placeholder"></div>
+            {% endif %}
+        </div>
+
+        <div class="borrow-info">
+            <div class="borrow-title">{{ item.borrow.book.book_name }}</div>
+            <div class="borrow-meta">
+                {{ item.borrow.book.author.author_name }}
+            </div>
+            <div class="borrow-status" style="color: #0b5faf;">
+                <i class="fas fa-check-circle"></i> Đã đặt trước (Đến thư viện để nhận sách)
+            </div>
+            <div class="borrow-meta">
+                Ngày đặt: {{ item.borrow.borrow_date|date:"d/m/Y" }}
+            </div>
+        </div>
+
+        <div class="borrow-actions">
+            <button class="btn-delete"
+                    hx-post="{% url 'cancel_pending_borrow' item.borrow.borrow_id %}"
+                    hx-confirm="Bạn có chắc chắn muốn hủy đặt trước cuốn sách này không?"
+                    hx-target="closest .borrow-card"
+                    hx-swap="outerHTML">
+                Hủy đặt trước
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
