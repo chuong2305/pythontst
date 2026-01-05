@@ -2,29 +2,18 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.html import format_html
-
-
-from .models import Account, Author, Category, Publisher, Book, Borrow
-from datetime import timedelta
 from django.urls import path
 from django.http import JsonResponse
 from django.core.cache import cache
-
-from django.contrib import admin
-from django.utils.timezone import now
 from datetime import timedelta
-from .models import Borrow
-from datetime import timedelta
-from django.utils import timezone
 
-
+from .models import Account, Author, Category, Publisher, Book, Borrow
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
     list_display = ("account_name", "account_id", "email", "username", "phone", "status", "role")
     search_fields = ("account_name", "username", "email", "phone", "account_id")
     ordering = ("account_name",)
-
     fieldsets = (
         (None, {
             "fields": (
@@ -33,21 +22,21 @@ class AccountAdmin(admin.ModelAdmin):
         }),
     )
     change_list_template = "partials/change_list.html"
+
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
-
         extra_context["stats"] = [
             {"label": "Tổng người dùng", "value": Account.objects.count()},
             {"label": "Kích hoạt", "value": Account.objects.filter(status="active").count()},
             {"label": "Chưa kích hoạt", "value": Account.objects.filter(status="inactive").count()},
         ]
-
         return super().changelist_view(request, extra_context=extra_context)
-
 
     def account_id_display(self, obj):
         return obj.pk if obj and obj.pk else "Sẽ được tạo sau khi lưu"
+
     account_id_display.short_description = "Account ID"
+
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
@@ -57,12 +46,10 @@ class AuthorAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
-        from .models import Author, Book  # Only needed if not imported above
-
+        from .models import Author
         total_authors = Author.objects.count()
         authors_with_books = Author.objects.filter(book__isnull=False).distinct().count()
         authors_without_books = total_authors - authors_with_books
-
         extra_context["stats"] = [
             {"label": "Tổng tác giả", "value": total_authors},
             {"label": "Có sách", "value": authors_with_books},
@@ -80,11 +67,9 @@ class CategoryAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         from .models import Category
-
         total_categories = Category.objects.count()
         categories_with_books = Category.objects.filter(books__isnull=False).distinct().count()
         categories_without_books = total_categories - categories_with_books
-
         extra_context["stats"] = [
             {"label": "Tổng thể loại", "value": total_categories},
             {"label": "Có sách", "value": categories_with_books},
@@ -102,11 +87,9 @@ class PublisherAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         from .models import Publisher
-
         total_publishers = Publisher.objects.count()
         publishers_with_books = Publisher.objects.filter(book__isnull=False).distinct().count()
         publishers_without_books = total_publishers - publishers_with_books
-
         extra_context["stats"] = [
             {"label": "Tổng nhà xuất bản", "value": total_publishers},
             {"label": "Có sách", "value": publishers_with_books},
@@ -118,24 +101,15 @@ class PublisherAdmin(admin.ModelAdmin):
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     list_display = (
-        "book_name",
-        "get_author",
-        "get_categories",
-        "get_publisher",
-        "publishYear",
-        "dateAdd",
+        "book_name", "get_author", "get_categories", "get_publisher", "publishYear", "dateAdd",
     )
     list_filter = ("categories", "author", "publisher", "publishYear")
-    search_fields = (
-        "book_name",
-        "author__author_name",
-        "publisher__publish_name",
-        "categories__category_name",
-    )
+    search_fields = ("book_name", "author__author_name", "publisher__publish_name", "categories__category_name",)
     filter_horizontal = ("categories",)
     ordering = ("book_name",)
     readonly_fields = ("public_url_display",)
     change_list_template = "partials/change_list.html"
+
     fieldsets = (
         (None, {
             'fields': (
@@ -153,15 +127,18 @@ class BookAdmin(admin.ModelAdmin):
 
     def get_author(self, obj):
         return obj.author.author_name
+
     get_author.short_description = "Author"
     get_author.admin_order_field = "author__author_name"
 
     def get_categories(self, obj):
         return ", ".join([c.category_name for c in obj.categories.all()])
+
     get_categories.short_description = "Categories"
 
     def get_publisher(self, obj):
         return obj.publisher.publish_name
+
     get_publisher.short_description = "Publisher"
 
     def public_url_display(self, obj):
@@ -174,13 +151,10 @@ class BookAdmin(admin.ModelAdmin):
         return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>', url, url)
 
     public_url_display.short_description = "Public URL"
+
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
-        from .models import Book, Borrow
-        from django.utils import timezone
-        from datetime import timedelta
         from django.db.models import Count
-
         today = timezone.now().date()
         recent_days = today - timedelta(days=30)
 
@@ -189,7 +163,6 @@ class BookAdmin(admin.ModelAdmin):
         out_of_stock = Book.objects.filter(available=0).count()
         recent_books = Book.objects.filter(dateAdd__gte=recent_days).count()
 
-        # Find book with most borrows in last 30 days
         top_borrowed = (
             Borrow.objects
             .filter(borrow_date__gte=recent_days)
@@ -215,12 +188,14 @@ class BookAdmin(admin.ModelAdmin):
 
 BORROW_VERSION_KEY = "borrows_version"
 
+
 def get_borrows_version():
     v = cache.get(BORROW_VERSION_KEY)
     if v is None:
         cache.set(BORROW_VERSION_KEY, 1)
         v = 1
     return int(v)
+
 
 def bump_borrows_version():
     if cache.get(BORROW_VERSION_KEY) is None:
@@ -229,19 +204,55 @@ def bump_borrows_version():
         try:
             cache.incr(BORROW_VERSION_KEY)
         except ValueError:
-            # một số backend không có incr
             cache.set(BORROW_VERSION_KEY, get_borrows_version() + 1)
+
 
 @admin.register(Borrow)
 class BorrowAdmin(admin.ModelAdmin):
-    readonly_fields = ("fine",)
     change_list_template = "partials/change_list.html"
-    list_display = ("user_display", "user_id_display", "book", "borrow_date", "due_date", "status_display")
-    list_filter = ("status",)
+    list_display = ("user_display", "user_id_display", "book", "borrow_date", "due_date", "status_display",
+                    "damage_status_view")
+    list_filter = ("status", "damage_status")
     search_fields = ("user__account_name", "book__book_name")
-    actions = ["approve_borrow", "approve_return"]
+
+    actions = ["confirm_borrow", "cancel_reservation"]
+
+    fieldsets = (
+        ('Thông tin mượn', {
+            'fields': ('user', 'book', 'borrow_date', 'due_date')
+        }),
+        ('Cập nhật trạng thái & Chi tiết trả sách', {
+            'fields': ('status', 'is_notified', 'return_date', 'damage_status', 'fine'),
+            'description': 'Thay đổi trạng thái và nhập thông tin trả sách tại đây.'
+        }),
+    )
+
+    readonly_fields = ("fine",)
+
+    def damage_status_view(self, obj):
+        if obj.status == 'returned':
+            return obj.get_damage_status_display()
+        return ""
+
+    damage_status_view.short_description = "Hư hại"
 
     def save_model(self, request, obj, form, change):
+        if not obj.due_date:
+            obj.due_date = (obj.borrow_date or timezone.now().date()) + timedelta(days=14)
+
+        if obj.status != 'returned':
+            obj.damage_status = 'none'
+            obj.return_date = None
+            obj.fine = 0
+
+        if change:
+            try:
+                old_obj = Borrow.objects.get(pk=obj.pk)
+                if old_obj.status != obj.status:
+                    obj.is_notified = False
+            except Borrow.DoesNotExist:
+                pass
+
         if obj.status == 'borrowed':
             reserved_count = Borrow.objects.filter(
                 book=obj.book,
@@ -249,15 +260,17 @@ class BorrowAdmin(admin.ModelAdmin):
             ).exclude(pk=obj.pk).count()
 
             if obj.book.available <= reserved_count:
-                raise ValidationError(
-                    "Hiện đã có người dùng khác đặt trước."
-                )
+                raise ValidationError("Hiện đã có người dùng khác đặt trước.")
+
+        if obj.status == 'returned' and not obj.return_date:
+            obj.return_date = timezone.now().date()
 
         super().save_model(request, obj, form, change)
 
+        bump_borrows_version()
+
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
-
         today = timezone.now().date()
         last_30_days = today - timedelta(days=30)
 
@@ -268,11 +281,8 @@ class BorrowAdmin(admin.ModelAdmin):
             {"label": "Đang mượn", "value": Borrow.objects.filter(status="borrowed").count()},
             {"label": "Đã trả", "value": Borrow.objects.filter(status="returned").count()},
         ]
-
         extra_context["initial_version"] = get_borrows_version()
         return super().changelist_view(request, extra_context=extra_context)
-
-
 
     def get_urls(self):
         urls = super().get_urls()
@@ -282,26 +292,25 @@ class BorrowAdmin(admin.ModelAdmin):
         return custom + urls
 
     def poll_view(self, request):
-        # GET /admin/library/borrow/poll/
         return JsonResponse({"version": get_borrows_version(), "now": timezone.now().isoformat()})
 
-    @admin.action(description="Xác nhận mượn sách")
+    @admin.action(description="Xác nhận mượn sách (Duyệt)")
     def confirm_borrow(self, request, queryset):
+        updated_count = 0
         for b in queryset.filter(status='reserved'):
             b.status = 'borrowed'
             b.borrow_date = timezone.now().date()
             b.due_date = b.borrow_date + timedelta(days=14)
+            b.is_notified = False
             b.save()
+            updated_count += 1
+        self.message_user(request, f"Đã duyệt mượn {updated_count} sách.")
+        bump_borrows_version()
 
-    @admin.action(description="Xác nhận trả sách")
-    def confirm_return(self, request, queryset):
-        for b in queryset.filter(status='borrowed'):
-            b.status = 'returned'
-            b.return_date = timezone.now().date()
-            b.save()
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
+    @admin.action(description="Hủy đặt trước (Từ chối)")
+    def cancel_reservation(self, request, queryset):
+        deleted_count, _ = queryset.filter(status='reserved').delete()
+        self.message_user(request, f"Đã hủy {deleted_count} yêu cầu đặt trước.")
         bump_borrows_version()
 
     def delete_model(self, request, obj):
@@ -314,13 +323,16 @@ class BorrowAdmin(admin.ModelAdmin):
 
     def user_display(self, obj):
         return getattr(obj.user, "account_name", obj.user)
+
     user_display.short_description = "User"
 
     def user_id_display(self, obj):
         return getattr(obj.user, "account_id", None)
+
     user_id_display.short_description = "Account ID"
     user_id_display.admin_order_field = "user__account_id"
 
     def status_display(self, obj):
         return obj.get_status_display()
+
     status_display.short_description = "Trạng thái"
