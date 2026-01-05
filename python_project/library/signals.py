@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.core.cache import cache
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import send_mail
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.html import strip_tags
@@ -48,7 +48,7 @@ def track_status_change(sender, instance, **kwargs):
 @receiver(post_save, sender=Borrow)
 def borrow_changed(sender, instance, created, **kwargs):
     bump()
-    # --- BẮT ĐẦU LOGIC GỬI MAIL ---
+
     if not created:
         user_email = instance.user.email
         if not user_email:
@@ -66,7 +66,6 @@ def borrow_changed(sender, instance, created, **kwargs):
         subject = ""
         html_content = ""
 
-        # CSS chung cho email
         style_container = "font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 10px; background-color: #ffffff;"
         style_header = "color: #1851A8; font-size: 24px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #1851A8; padding-bottom: 10px;"
         style_text = "font-size: 16px; line-height: 1.6; color: #333333; margin-bottom: 15px;"
@@ -74,7 +73,6 @@ def borrow_changed(sender, instance, created, **kwargs):
         style_warning = "color: #d97706; font-weight: 600;"
         style_footer = "margin-top: 30px; font-size: 14px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 15px;"
 
-        # Trường hợp 1: Admin duyệt mượn (Status -> borrowed)
         if new_status == 'borrowed':
             display_date = instance.due_date.strftime('%d/%m/%Y') if instance.due_date else "Chưa xác định"
             subject = f"📚 Thông báo: Bạn đã mượn sách '{book_name}'"
@@ -100,13 +98,11 @@ def borrow_changed(sender, instance, created, **kwargs):
             </div>
             """
 
-        # Trường hợp 2: Admin xác nhận trả (Status -> returned)
         elif new_status == 'returned':
             subject = f"✅ Thông báo: Đã trả sách '{book_name}' thành công"
             fine_text = f"{instance.fine:,.0f}" if instance.fine else "0"
             damage_text = instance.get_damage_status_display()
 
-            # Đổi màu tiêu đề nếu có phạt
             header_color = "#dc2626" if instance.fine > 0 else "#059669"
             style_header_return = f"color: {header_color}; font-size: 24px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid {header_color}; padding-bottom: 10px;"
 
@@ -133,26 +129,19 @@ def borrow_changed(sender, instance, created, **kwargs):
 
         if subject and html_content:
             try:
-                # Tạo bản text thuần túy từ HTML (cho các trình mail cũ không hỗ trợ HTML)
                 text_content = strip_tags(html_content)
 
-                # Tạo EmailMultiAlternatives object
-                msg = EmailMultiAlternatives(
-                    subject,
-                    text_content,  # Nội dung text (fallback)
-                    settings.DEFAULT_FROM_EMAIL,
-                    [user_email]
+                send_mail(
+                    subject=subject,
+                    message=text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user_email],
+                    html_message=html_content,
+                    fail_silently=False
                 )
-
-                # Đính kèm nội dung HTML
-                msg.attach_alternative(html_content, "text/html")
-
-                # Gửi mail
-                msg.send(fail_silently=False)
                 print(f"HTML Email sent successfully to {user_email}")
             except Exception as e:
                 print(f"Lỗi gửi email: {e}")
-    # --- KẾT THÚC LOGIC GỬI MAIL ---
 
 
 @receiver(post_delete, sender=Borrow)
