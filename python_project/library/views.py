@@ -41,7 +41,17 @@ def session_login_required(view_func):
 
 
 def home_page_user(request):
-    return render(request, 'home-page-user.html')
+    account = _get_current_account(request)
+    notifications = []
+    if account:
+        notifications = Borrow.objects.filter(
+            user=account,
+            status__in=['borrowed', 'returned']  # Lấy trạng thái đã duyệt mượn hoặc đã trả
+        ).select_related('book').order_by('-borrow_id')
+
+    return render(request, 'home-page-user.html', {
+        'notifications': notifications
+    })
 
 
 def login_view(request):

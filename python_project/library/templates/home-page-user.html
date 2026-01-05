@@ -20,12 +20,9 @@
         </div>
         <nav class="nav-menu">
             <ul>
-                <li><a href="{% url 'user_books_author' %}" class="menu-item active"><i class="fas fa-book"></i> <span>Thư viện sách</span></a>
-                </li>
-                <li><a href="{% url 'user_borrowed' %}" class="menu-item"><i class="fas fa-hand-holding"></i> <span>Sách đang mượn</span></a>
-                </li>
-                <li><a href="{% url 'library_rule' %}" class="menu-item"><i class="fa-solid fa-book"></i> <span>Nội quy thư viện</span></a>
-                </li>
+                <li><a href="{% url 'user_books_author' %}" class="menu-item active"><i class="fas fa-book"></i> <span>Thư viện sách</span></a></li>
+                <li><a href="{% url 'user_borrowed' %}" class="menu-item"><i class="fas fa-hand-holding"></i> <span>Sách đang mượn</span></a></li>
+                <li><a href="{% url 'library_rule' %}" class="menu-item"><i class="fa-solid fa-book"></i> <span>Nội quy thư viện</span></a></li>
             </ul>
         </nav>
     </aside>
@@ -38,32 +35,43 @@
             <div class="topbar-right">
                 <div class="header-actions">
                     <div class="notification-wrapper">
-                        <button class="notification-button" aria-label="Notifications" id="notification-toggle">
+                        <button type="button" class="notification-button" aria-label="Notifications" id="notification-toggle">
                             <span class="material-symbols-outlined">notifications</span>
-                            <div class="notification-badge">3</div>
+                            {% if notifications %}
+                                <div class="notification-badge">{{ notifications|length }}</div>
+                            {% endif %}
                         </button>
+
                         <div class="notification-popup" id="notification-popup">
                             <div class="notification-popup-header">
-                                <h3>Thông báo</h3>
+                                <h3>Thông báo mới</h3>
                             </div>
                             <div class="notification-popup-content">
-                                <div class="notification-popup-item">
-                                    <span class="material-symbols-outlined notification-popup-icon notification-popup-icon--info">info</span>
-                                    <div class="notification-popup-text">
-                                        <p class="notification-popup-title">Sự kiện giao lưu tác giả</p>
-                                        <p class="notification-popup-desc">Diễn ra Thứ 7 tuần này</p>
+                                {% for n in notifications|slice:":5" %}
+                                    <div class="notification-popup-item">
+                                        {% if n.status == 'borrowed' %}
+                                            <i class="fas fa-check-circle" style="color: #2563eb;"></i>
+                                            <div class="popup-text">
+                                                <span>Đã duyệt mượn:</span>
+                                                <strong>{{ n.book.book_name }}</strong>
+                                            </div>
+                                        {% elif n.status == 'returned' %}
+                                            <i class="fas fa-undo" style="color: #059669;"></i>
+                                            <div class="popup-text">
+                                                <span>Đã trả sách:</span>
+                                                <strong>{{ n.book.book_name }}</strong>
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                </div>
-                                <div class="notification-popup-item">
-                                    <span class="material-symbols-outlined notification-popup-icon notification-popup-icon--warning">schedule</span>
-                                    <div class="notification-popup-text">
-                                        <p class="notification-popup-title">Sách sắp đến hạn trả</p>
-                                        <p class="notification-popup-desc">Hạn trả ngày mai</p>
+                                {% empty %}
+                                    <div class="noti-empty">
+                                        <i class="far fa-bell" style="margin-bottom: 5px; display: block;"></i>
+                                        Bạn chưa có thông báo nào.
                                     </div>
-                                </div>
+                                {% endfor %}
                             </div>
                             <div class="notification-popup-footer">
-                                <a href="{% url 'notify' %}" id="viewAllNotiBtn">Xem tất cả →</a>
+                                <a href="{% url 'notify' %}" id="viewAllNotiBtn">Xem tất cả thông báo</a>
                             </div>
                         </div>
                     </div>
@@ -77,103 +85,90 @@
                     </div>
 
                     <ul class="header__user-dropdown">
-                        <li>
-                            <a href="{% url 'library_card' %}" id="profileBtn"><i class="fas fa-id-card"></i> Thẻ thư
-                                viện</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'login_view' %}"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
-                        </li>
+                        <li><a href="{% url 'library_card' %}" id="profileBtn"><i class="fas fa-id-card"></i> Thẻ thư viện</a></li>
+                        <li><a href="{% url 'login_view' %}"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a></li>
                     </ul>
                 </div>
             </div>
         </header>
+
         <div class="content-area">
             <iframe src="{% url 'user_books_author' %}" id="pageFrame" frameborder="0"></iframe>
-
         </div>
 
     </main>
-
 </div>
 
 <script>
-    var menuItems = document.getElementsByClassName('menu-item');
-    for (var i = 0; i < menuItems.length; i++) {
-        menuItems[i].onclick = function (event) {
-            event.preventDefault();
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Xử lý Menu
+        const menuItems = document.querySelectorAll('.menu-item');
+        const pageFrame = document.getElementById('pageFrame');
+        const pageTitle = document.getElementById('pageTitle');
 
-            document.getElementById('pageFrame').src = this.getAttribute('href');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                pageFrame.src = this.getAttribute('href');
+                pageTitle.textContent = this.querySelector('span').textContent;
 
-            document.getElementById('pageTitle').textContent = this.textContent.trim();
+                menuItems.forEach(mi => mi.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
 
-            for (var j = 0; j < menuItems.length; j++) {
-                menuItems[j].classList.remove('active');
-            }
-            this.classList.add('active');
-        };
-    }
+        // 2. Xử lý nút Profile
+        const profileBtn = document.getElementById('profileBtn');
+        if (profileBtn) {
+            profileBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                pageFrame.src = this.getAttribute('href');
+                pageTitle.textContent = 'Thẻ thư viện';
 
-    var profileBtn = document.getElementById('profileBtn');
-    if (profileBtn) {
-        profileBtn.onclick = function (event) {
-            event.preventDefault();
+                menuItems.forEach(mi => mi.classList.remove('active'));
+                // Active menu item nếu trùng link (optional)
+                menuItems.forEach(mi => {
+                    if(mi.getAttribute('href') === this.getAttribute('href')) mi.classList.add('active');
+                });
+            });
+        }
 
-            document.getElementById('pageFrame').src = this.getAttribute('href');
+        // 3. Xử lý Popup Thông báo (QUAN TRỌNG)
+        const notiBtn = document.getElementById('notification-toggle');
+        const notiPopup = document.getElementById('notification-popup');
 
-            document.getElementById('pageTitle').textContent = 'Thẻ thư viện';
+        if (notiBtn && notiPopup) {
+            // Toggle khi click vào chuông
+            notiBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Ngăn sự kiện nổi bọt lên document
+                notiPopup.classList.toggle('active');
+            });
 
-            for (var j = 0; j < menuItems.length; j++) {
-                menuItems[j].classList.remove('active');
-            }
-            for (var j = 0; j < menuItems.length; j++) {
-                if (menuItems[j].getAttribute('href') === "{% url 'library_card' %}") {
-                    menuItems[j].classList.add('active');
+            // Đóng khi click ra ngoài popup
+            document.addEventListener('click', function(e) {
+                if (!notiPopup.contains(e.target) && !notiBtn.contains(e.target)) {
+                    notiPopup.classList.remove('active');
                 }
-            }
-        };
-    }
-    const notiBtn = document.getElementById('notification-toggle');
-    const notiPopup = document.getElementById('notification-popup');
+            });
+        }
 
-    if (notiBtn && notiPopup) {
-        notiBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            notiPopup.classList.toggle('active');
-    });
+        // 4. Xử lý nút "Xem tất cả" trong popup
+        const viewAllNotiBtn = document.getElementById('viewAllNotiBtn');
+        if (viewAllNotiBtn) {
+            viewAllNotiBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if(notiPopup) notiPopup.classList.remove('active');
 
-    document.addEventListener('click', function(e) {
-        if (!notiPopup.contains(e.target) && !notiBtn.contains(e.target)) {
-            notiPopup.classList.remove('active');
+                pageFrame.src = this.getAttribute('href');
+                pageTitle.textContent = 'Thông báo';
+
+                menuItems.forEach(mi => mi.classList.remove('active'));
+                menuItems.forEach(mi => {
+                    if(mi.getAttribute('href') === "{% url 'notify' %}") mi.classList.add('active');
+                });
+            });
         }
     });
-}
-    var viewAllNotiBtn = document.getElementById('viewAllNotiBtn');
-    if (viewAllNotiBtn) {
-        viewAllNotiBtn.onclick = function (event) {
-            event.preventDefault();
-
-            document.getElementById('pageFrame').src = this.getAttribute('href');
-
-            document.getElementById('pageTitle').textContent = 'Thông báo';
-
-            const notiPopup = document.getElementById('notification-popup');
-            if (notiPopup) {
-                notiPopup.classList.remove('active');
-            }
-
-            for (var j = 0; j < menuItems.length; j++) {
-                menuItems[j].classList.remove('active');
-            }
-
-            for (var j = 0; j < menuItems.length; j++) {
-                if (menuItems[j].getAttribute('href') === "{% url 'notify' %}") {
-                    menuItems[j].classList.add('active');
-                }
-            }
-        };
-    }
-
 </script>
 </body>
 </html>
