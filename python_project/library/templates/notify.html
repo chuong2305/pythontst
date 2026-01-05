@@ -20,6 +20,15 @@
             color: #15803d;
             font-weight: 600;
         }
+        .notify-warning {
+            margin-top: 8px;
+            padding: 10px;
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            color: #b45309;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
@@ -33,7 +42,16 @@
             </div>
 
             <div class="notify-info">
-                {% if n.status == 'borrowed' %}
+                {% if n.days_until_due == 1 %}
+                    <div class="notify-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Nhắc nhở: Cuốn sách <strong>"{{ n.book.book_name }}"</strong> sắp đến hạn trả (Còn 1 ngày).
+                        <div style="margin-top: 4px; font-size: 0.9em; color: #92400e;">
+                            Hạn trả: <strong>{{ n.due_date|date:"d/m/Y" }}</strong>. Vui lòng trả sách đúng hạn để tránh phát sinh phí phạt.
+                        </div>
+                    </div>
+
+                {% elif n.status == 'borrowed' %}
                     <div>
                         <i class="fas fa-check-circle" style="color: #2563eb;"></i>
                         Admin đã <strong>chấp nhận</strong> yêu cầu mượn cuốn sách <strong>"{{ n.book.book_name }}"</strong> của bạn.

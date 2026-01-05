@@ -103,6 +103,12 @@ class Borrow(models.Model):
     )
     status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='reserved')
 
+    @property
+    def days_until_due(self):
+        if self.due_date and self.status == 'borrowed':
+            return (self.due_date - timezone.now().date()).days
+        return None
+
     def calculate_fine(self):
         total_fine = 0
 
