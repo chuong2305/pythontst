@@ -103,6 +103,19 @@ def borrow_changed(sender, instance, created, **kwargs):
             fine_text = f"{instance.fine:,.0f}" if instance.fine else "0"
             damage_text = instance.get_damage_status_display()
 
+            # Xử lý ngày trả và trạng thái quá hạn
+            return_date_str = instance.return_date.strftime('%d/%m/%Y') if instance.return_date else "N/A"
+
+            # Mặc định là đúng hạn
+            overdue_status = "Đúng hạn"
+            style_overdue = "color: #059669; font-weight: bold;"  # Màu xanh lá
+
+            # Kiểm tra nếu trả sau hạn
+            if instance.due_date and instance.return_date and instance.return_date > instance.due_date:
+                days_late = (instance.return_date - instance.due_date).days
+                overdue_status = f"Quá hạn ({days_late} ngày)"
+                style_overdue = "color: #dc2626; font-weight: bold;"  # Màu đỏ
+
             header_color = "#dc2626" if instance.fine > 0 else "#059669"
             style_header_return = f"color: {header_color}; font-size: 24px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid {header_color}; padding-bottom: 10px;"
 
@@ -114,6 +127,8 @@ def borrow_changed(sender, instance, created, **kwargs):
 
                 <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
                     <p style="{style_text} margin: 5px 0;">📖 Sách: <span style="{style_highlight}">{book_name}</span></p>
+                    <p style="{style_text} margin: 5px 0;">📅 Ngày trả: {return_date_str}</p>
+                    <p style="{style_text} margin: 5px 0;">⏱️ Thời hạn: <span style="{style_overdue}">{overdue_status}</span></p>
                     <p style="{style_text} margin: 5px 0;">🔍 Tình trạng sách: {damage_text}</p>
                     <p style="{style_text} margin: 5px 0;">💰 Phí phạt phát sinh: <span style="color: #dc2626; font-weight: bold;">{fine_text} VNĐ</span></p>
                 </div>

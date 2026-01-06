@@ -105,18 +105,21 @@ class Borrow(models.Model):
 
     @property
     def days_until_due(self):
+        # Fix logic: Sử dụng date.today() để đồng nhất với borrow_date
         if self.due_date and self.status == 'borrowed':
-            return (self.due_date - timezone.now().date()).days
+            return (self.due_date - date.today()).days
         return None
 
     def calculate_fine(self):
         total_fine = 0
 
+        # Logic tính quá hạn
         if self.status == 'returned' and self.due_date and self.return_date:
             overdue_days = (self.return_date - self.due_date).days
             if overdue_days > 0:
-                total_fine += overdue_days * 1000
+                total_fine += overdue_days * 3000
 
+        # Logic tính hư hại
         price = self.book.price
         if self.damage_status == 'light':
             total_fine += int(price * 0.2)
@@ -132,8 +135,16 @@ class Borrow(models.Model):
         old_status = None
 
         if not is_new:
-            old_status = Borrow.objects.get(pk=self.pk).status
+            try:
+                old_status = Borrow.objects.get(pk=self.pk).status
+            except Borrow.DoesNotExist:
+                pass
 
+        # Đảm bảo due_date luôn được gán nếu đang mượn (Fix lỗi logic khi tạo từ view thường)
+        if self.status == 'borrowed' and not self.due_date:
+            self.due_date = (self.borrow_date or date.today()) + timedelta(days=14)
+
+        # Logic cập nhật số lượng sách tồn kho khi duyệt mượn
         if ((is_new and self.status == 'borrowed') or
                 (old_status == 'reserved' and self.status == 'borrowed')):
             reserved_count = Borrow.objects.filter(
@@ -148,13 +159,15 @@ class Borrow(models.Model):
             self.book.available -= 1
             self.book.save(update_fields=['available'])
 
+        # Logic cập nhật số lượng sách tồn kho khi trả
         if old_status == 'borrowed' and self.status == 'returned':
             self.book.available += 1
             self.book.save(update_fields=['available'])
 
+        # Logic tính phạt khi trả sách
         if self.status == 'returned':
             if not self.return_date:
-                self.return_date = timezone.now().date()
+                self.return_date = date.today()
             self.fine = self.calculate_fine()
         else:
             self.fine = 0
