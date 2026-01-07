@@ -22,7 +22,6 @@ def _get_current_account(request):
 
 
 def calculate_days_left(borrow_instance):
-    """Hàm phụ trợ tính số ngày còn lại"""
     if borrow_instance.due_date and borrow_instance.status == 'borrowed':
         delta = borrow_instance.due_date - timezone.now().date()
         return delta.days
@@ -46,7 +45,7 @@ def home_page_user(request):
     if account:
         notifications = Borrow.objects.filter(
             user=account,
-            status__in=['borrowed', 'returned']  # Lấy trạng thái đã duyệt mượn hoặc đã trả
+            status__in=['borrowed', 'returned']
         ).select_related('book').order_by('-borrow_id')
 
     return render(request, 'home-page-user.html', {
@@ -83,17 +82,10 @@ def notify(request):
     if not account:
         return redirect('login_view')
 
-    # Lấy các thông báo:
-    # 1. Admin đã duyệt mượn (status='borrowed')
-    # 2. Admin đã xác nhận trả (status='returned')
-    # Sắp xếp theo ID mới nhất lên đầu
     notifications = Borrow.objects.filter(
         user=account,
         status__in=['borrowed', 'returned']
     ).select_related('book').order_by('-borrow_id')
-
-    # Sau khi lấy dữ liệu, bạn có thể đánh dấu là đã xem (tùy chọn logic của bạn)
-    # notifications.update(is_notified=True)
 
     return render(request, 'notify.html', {
         'notifications': notifications
@@ -150,9 +142,6 @@ def user_books_view(request):
 
     books = books.distinct()
 
-    # =========================
-    # RECOMMENDED BOOKS
-    # =========================
     account = _get_current_account(request)
     if account:
         recommended_books = RecommendationService.get_recommendations_for_user(account, limit=6)
@@ -178,6 +167,20 @@ def user_books_view(request):
 def reserve_book(request, book_id):
     account = _get_current_account(request)
     book = get_object_or_404(Book, pk=book_id)
+
+    # Kiểm tra xem người dùng đã có trạng thái mượn/đặt với sách này chưa
+    existing_borrow = Borrow.objects.filter(
+        user=account,
+        book=book,
+        status__in=['reserved', 'borrowed', 'pending']
+    ).exists()
+
+    if existing_borrow:
+        messages.error(
+            request,
+            "Bạn đã đặt trước hoặc đang mượn cuốn sách này."
+        )
+        return redirect('user_books_author')
 
     reserved_count = Borrow.objects.filter(
         book=book,
@@ -209,7 +212,6 @@ def user_borrowed(request):
     if not account:
         return redirect('login_view')
 
-    # Chỉ cần đếm số lượng để hiển thị badge trên Tab (Ví dụ: Đã mượn 3/5)
     current_borrowed_count = Borrow.objects.filter(user=account, status='borrowed').count()
 
     return render(request, 'user-borrowed.html', {
@@ -240,7 +242,6 @@ def confirm_return(request, borrow_id):
     messages.success(request, f"Đã gửi yêu cầu trả '{b.book.book_name}'.")
 
     if request.headers.get('HX-Request'):
-        # Trả về partial để replace card cũ
         item_context = {'borrow': b, 'days_left': None}
         return render(request, 'partials/borrow_card.html', {'item': item_context})
 
@@ -250,15 +251,13 @@ def confirm_return(request, borrow_id):
 @session_login_required
 @require_POST
 def cancel_pending_borrow(request, borrow_id):
-    # Hàm này dùng chung cho Hủy 'Pending' và Hủy 'Reserved'
     account = _get_current_account(request)
-    # Tìm borrow có status là reserved hoặc pending
     b = get_object_or_404(Borrow, borrow_id=borrow_id, user=account, status__in=['reserved', 'pending'])
     b.delete()
     messages.success(request, "Đã hủy yêu cầu.")
 
     if request.headers.get('HX-Request'):
-        return HttpResponse("")  # Xóa card khỏi giao diện
+        return HttpResponse("")
     return redirect('user_borrowed')
 
 
@@ -296,18 +295,13 @@ def get_pending_requests(request):
         'pending_count': pending.count()
     })
 
-# ... (các hàm cũ giữ nguyên) ...
 
 @session_login_required
 def get_user_active_borrows(request):
-    """
-    Hàm này được gọi tự động 2 giây/lần để lấy danh sách mượn mới nhất
-    """
     account = _get_current_account(request)
     if not account:
-        return HttpResponse("")  # Trả về rỗng nếu chưa đăng nhập
+        return HttpResponse("")
 
-    # Lấy danh sách Active (Pending + Borrowed) y hệt như view chính
     borrows_active = (Borrow.objects
                       .select_related('book', 'book__author')
                       .filter(user=account, status__in=['pending', 'borrowed'])
@@ -315,11 +309,9 @@ def get_user_active_borrows(request):
 
     active_items = []
     for b in borrows_active:
-        # Tính lại ngày còn lại (Realtime)
         days_left = calculate_days_left(b)
         active_items.append({'borrow': b, 'days_left': days_left})
 
-    # Trả về partial html
     return render(request, 'partials/user_active_list.html', {
         'items': active_items,
         'is_empty_active': len(active_items) == 0,
@@ -327,19 +319,14 @@ def get_user_active_borrows(request):
 
 @session_login_required
 def get_user_returned_history(request):
-    """
-    Hàm này lấy danh sách Đã trả + Chờ trả (Polling 2s/lần)
-    """
     account = _get_current_account(request)
     if not account: return HttpResponse("")
 
-    # Lấy danh sách History (Returned + Await Return)
     borrows_returned = (Borrow.objects
                         .select_related('book', 'book__author')
                         .filter(user=account, status__in=['await_return', 'returned'])
                         .order_by('-return_date', '-borrow_id'))
 
-    # Đóng gói dữ liệu
     returned_items = [{'borrow': b} for b in borrows_returned]
 
     return render(request, 'partials/user_returned_list.html', {
@@ -353,13 +340,11 @@ def get_user_reserved_books(request):
 
     account = _get_current_account(request)
     if not account: return HttpResponse("")
-    # Lấy danh sách Reserved
     borrows_reserved = (Borrow.objects
                         .select_related('book', 'book__author')
                         .filter(user=account, status='reserved')
                         .order_by('-borrow_date'))
 
-    # Đóng gói dữ liệu
     reserved_items = [{'borrow': b} for b in borrows_reserved]
 
     return render(request, 'partials/user_reserved_list.html', {
