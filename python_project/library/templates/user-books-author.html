@@ -73,7 +73,7 @@
       <input type="date" name="date_add" value="{{ selected_date }}">
     </div>
 
-    <div class="filter-group">
+    <div class="filter-group" style="margin-left:70px">
       <label>Trạng thái</label>
       <select name="status">
         <option value="" {% if not selected_status %}selected{% endif %}>Tất cả</option>
@@ -82,7 +82,7 @@
       </select>
     </div>
 
-    <div class="filter-actions">
+    <div class="filter-actions" style="margin-right:67px">
       <button type="submit" class="btn-apply">Áp dụng</button>
       <a href="{% url 'user_books_author' %}" class="btn-reset">Làm mới</a>
     </div>
