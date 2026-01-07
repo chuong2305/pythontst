@@ -77,7 +77,6 @@ def library_rule(request):
 def library_card(request):
     return render(request, 'library_card.html')
 
-
 @session_login_required
 def notify(request):
     account = _get_current_account(request)
