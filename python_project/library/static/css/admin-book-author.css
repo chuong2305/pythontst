@@ -99,7 +99,7 @@ body {
 }
 
 .filter-group label {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 8px;
     color: #1e3a5f;
@@ -111,7 +111,7 @@ body {
     padding: 10px 20px;
     border-radius: 50px;
     border: 1px solid #cbd5e1;
-    min-width: 180px;
+    min-width: 210px;
     background-color: #f8fbff;
     transition: all 0.3s ease;
     appearance: none;
@@ -119,6 +119,7 @@ body {
     background-repeat: no-repeat;
     background-position: right 15px top 50%;
     background-size: 10px auto;
+    font-size:15px;
 }
 
 .filter-group input {
