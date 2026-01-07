@@ -15,12 +15,12 @@
         <div class="card-title">Thẻ Thư Viện</div>
     </div>
     <div class="card-info">
-        <div class="card-text">Tên: Phạm Quốc Đăng</div>
-        <div class="card-text">Mã thẻ: TV123456</div>
-        <div class="card-text">Ngày tạo: 01/01/2025</div>
-        <div class="card-text">Ngày hết hạn: 01/01/2026</div>
+        <div class="card-text">Tên: {{ account.account_name }}</div>
+        <div class="card-text">Mã thẻ: {{ account.account_id }}</div>
+        <div class="card-text">Email: {{ account.email }}</div>
+        <div class="card-text">Số điện thoại: {{ account.phone }}</div>
         <div class="card-text">
-            Trạng thái: <span class="status-active">đã kích hoạt</span>
+            Trạng thái: <span class="status-{{ account.status }}">{{ account.get_status_display }}</span>
         </div>
     </div>
 </div>
