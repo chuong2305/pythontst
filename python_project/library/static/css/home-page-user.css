@@ -137,6 +137,11 @@ body.home-user-page {
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid #ccc;
+    transition: border-color 0.3s ease;
+}
+
+.user-wrapper:hover .avatar {
+    border-color: #1e64d1;
 }
 
 .avatar img {
