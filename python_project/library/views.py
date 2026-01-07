@@ -73,8 +73,12 @@ def library_rule(request):
     return render(request, 'library-rule.html')
 
 
+@session_login_required
 def library_card(request):
-    return render(request, 'library_card.html')
+    account = _get_current_account(request)
+    return render(request, 'library_card.html', {
+        'account': account
+    })
 
 @session_login_required
 def notify(request):
