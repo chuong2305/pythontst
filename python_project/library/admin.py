@@ -101,7 +101,7 @@ class PublisherAdmin(admin.ModelAdmin):
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     list_display = (
-        "book_name", "get_author", "get_categories", "get_publisher", "publishYear", "dateAdd",
+        "book_name", "get_author", "get_categories", "get_publisher", "dateAdd",
     )
     list_filter = ("categories", "author", "publisher", "publishYear")
     search_fields = ("book_name", "author__author_name", "publisher__publish_name", "categories__category_name",)
