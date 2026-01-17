@@ -7,66 +7,86 @@ from django.utils import timezone
 
 class Account(models.Model):
     id = models.AutoField(primary_key=True)
-    account_id = models.CharField(max_length=64, unique=True)
-    account_name = models.CharField(max_length=100)
+    account_id = models.CharField("Id tài khoản",max_length=64, unique=True)
+    account_name = models.CharField("Tên tài khoản",max_length=100)
     email = models.EmailField()
-    username = models.CharField(max_length=50)
-    password = models.CharField(max_length=128)
-    phone = models.CharField(max_length=20)
+    username = models.CharField("Tên đăng nhập",max_length=50)
+    password = models.CharField("Mật khẩu",max_length=128)
+    phone = models.CharField("Số điện thoại",max_length=20)
+
+    class Meta:
+        verbose_name = "Quản lý tài khoản"
+        verbose_name_plural = "Quản lý tài khoản"
 
     STATUS_CHOICES = (
         ('active', 'Kích hoạt'),
         ('inactive', 'Chưa kích hoạt'),
     )
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    status = models.CharField("Trạng thái",max_length=10, choices=STATUS_CHOICES)
 
     ROLE_CHOICES = (
-        ('Admin', 'Admin'),
+        ('Admin', 'Quản trị viên'),
         ('User', 'User'),
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    role = models.CharField("Phân quyền",max_length=10, choices=ROLE_CHOICES)
 
     def __str__(self):
         return self.account_name
 
 
 class Author(models.Model):
-    author_id = models.AutoField(primary_key=True)
-    author_name = models.CharField(max_length=100)
+    author_id = models.AutoField("Id Tác giả",primary_key=True)
+    author_name = models.CharField("Tên tác giả",max_length=100)
+
+    class Meta:
+        verbose_name = "Danh sách tác giả"
+        verbose_name_plural = "Danh sách tác giả"
 
     def __str__(self):
         return self.author_name
 
 
 class Category(models.Model):
-    category_id = models.AutoField(primary_key=True)
-    category_name = models.CharField(max_length=100, unique=True)
+    category_id = models.AutoField("Id thể loại",primary_key=True)
+    category_name = models.CharField("Tên thể loại",max_length=100, unique=True)
+
+    class Meta:
+        verbose_name = "Danh sách thể loại"
+        verbose_name_plural = "Danh sách thể loại"
 
     def __str__(self):
         return self.category_name
 
 
 class Publisher(models.Model):
-    publish_id = models.AutoField(primary_key=True)
-    publish_name = models.CharField(max_length=200, unique=True)
+    publish_id = models.AutoField("Id nhà xuất bản", primary_key=True)
+    publish_name = models.CharField("Tên nhà xuất bản", max_length=200, unique=True)
+
+    class Meta:
+        verbose_name = "Danh sách nhà xuất bản"
+        verbose_name_plural = "Danh sách nhà xuất bản"
 
     def __str__(self):
         return self.publish_name
 
 
 class Book(models.Model):
-    book_id = models.AutoField(primary_key=True)
-    book_name = models.CharField(max_length=200)
+    book_id = models.AutoField("Id sách",primary_key=True)
+    book_name = models.CharField("Tên sách",max_length=200)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     categories = models.ManyToManyField(Category, blank=True, related_name='books')
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
-    publishYear = models.PositiveIntegerField(null=True, blank=True)
-    dateAdd = models.DateField(auto_now_add=True)
-    quantity = models.PositiveIntegerField(default=5)
-    available = models.PositiveIntegerField(default=5)
-    price = models.PositiveIntegerField(default=0)
-    description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='books/', blank=True, null=True)
+    publishYear = models.PositiveIntegerField("Năm xuất bản", null=True, blank=True)
+    dateAdd = models.DateField("Ngày thêm",auto_now_add=True)
+    quantity = models.PositiveIntegerField("Tồn kho", default=5)
+    available = models.PositiveIntegerField("Còn lại", default=5)
+    price = models.PositiveIntegerField("Giá sách", default=0)
+    description = models.TextField("Mô tả sách", blank=True)
+    image = models.ImageField("Ảnh minh họa", upload_to='books/', blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Quản lý sách"
+        verbose_name_plural = "Quản lý sách"
 
     def __str__(self):
         return self.book_name
@@ -79,13 +99,17 @@ class Book(models.Model):
 
 
 class Borrow(models.Model):
-    borrow_id = models.AutoField(primary_key=True)
+    borrow_id = models.AutoField("Id mượn", primary_key=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    is_notified = models.BooleanField(default=False)
-    borrow_date = models.DateField(default=date.today)
-    due_date = models.DateField(null=True, blank=True)
-    return_date = models.DateField(null=True, blank=True)
+    is_notified = models.BooleanField("Nhận thông báo", default=False)
+    borrow_date = models.DateField("Ngày mượn", default=date.today)
+    due_date = models.DateField("Ngày hết hạn", null=True, blank=True)
+    return_date = models.DateField("Ngày trả", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Quản lý mượn/trả"
+        verbose_name_plural = "Quản lý mượn/trả"
 
     DAMAGE_CHOICES = (
         ('none', 'Không hư hại'),
@@ -93,15 +117,15 @@ class Borrow(models.Model):
         ('heavy', 'Hư nặng (50%)'),
         ('lost', 'Mất sách (100%)'),
     )
-    damage_status = models.CharField(max_length=10, choices=DAMAGE_CHOICES, default='none')
-    fine = models.PositiveIntegerField(default=0)
+    damage_status = models.CharField("Trạng thái sách", max_length=10, choices=DAMAGE_CHOICES, default='none')
+    fine = models.PositiveIntegerField("Tiền phạt", default=0)
 
     STATUS_CHOICES = (
         ('reserved', 'Đã đặt trước'),
         ('borrowed', 'Đang mượn'),
         ('returned', 'Đã trả'),
     )
-    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='reserved')
+    status = models.CharField("Trạng thái", max_length=16, choices=STATUS_CHOICES, default='reserved')
 
     @property
     def days_until_due(self):
