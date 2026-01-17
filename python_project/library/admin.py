@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.html import format_html
@@ -6,18 +7,18 @@ from django.urls import path
 from django.http import JsonResponse
 from django.core.cache import cache
 from datetime import timedelta
-
+from .models import get_max_borrow_days
 from .models import Account, Author, Category, Publisher, Book, Borrow
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ("account_name", "account_id", "email", "username", "phone", "status", "role")
+    list_display = ("account_name", "account_id", "email", "username", "phone", "status", "user_type")
     search_fields = ("account_name", "username", "email", "phone", "account_id")
     ordering = ("account_name",)
     fieldsets = (
         (None, {
             "fields": (
-                "account_id", "account_name", "email", "username", "password", "phone", "status", "role",
+                "account_id", "account_name", "email", "username", "password", "phone", "status", "user_type",
             )
         }),
     )
@@ -35,7 +36,7 @@ class AccountAdmin(admin.ModelAdmin):
     def account_id_display(self, obj):
         return obj.pk if obj and obj.pk else "Sẽ được tạo sau khi lưu"
 
-    account_id_display.short_description = "Account ID"
+    account_id_display.short_description = "ID"
 
 
 @admin.register(Author)
@@ -128,18 +129,18 @@ class BookAdmin(admin.ModelAdmin):
     def get_author(self, obj):
         return obj.author.author_name
 
-    get_author.short_description = "Author"
+    get_author.short_description = "Tác giả"
     get_author.admin_order_field = "author__author_name"
 
     def get_categories(self, obj):
         return ", ".join([c.category_name for c in obj.categories.all()])
 
-    get_categories.short_description = "Categories"
+    get_categories.short_description = "Thể loại"
 
     def get_publisher(self, obj):
         return obj.publisher.publish_name
 
-    get_publisher.short_description = "Publisher"
+    get_publisher.short_description = "Xuất bản"
 
     def public_url_display(self, obj):
         if not obj or not getattr(obj, 'pk', None):
@@ -207,6 +208,7 @@ def bump_borrows_version():
             cache.set(BORROW_VERSION_KEY, get_borrows_version() + 1)
 
 
+
 @admin.register(Borrow)
 class BorrowAdmin(admin.ModelAdmin):
     change_list_template = "partials/change_list.html"
@@ -219,7 +221,7 @@ class BorrowAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Thông tin mượn', {
-            'fields': ('user', 'book', 'borrow_date', 'due_date')
+            'fields': ('user_display', 'user_type_display', 'book_display', 'book_categories', 'borrow_date', 'due_date', 'max_borrow_days_display')
         }),
         ('Cập nhật trạng thái & Chi tiết trả sách', {
             'fields': ('status', 'is_notified', 'return_date', 'damage_status', 'fine'),
@@ -227,7 +229,33 @@ class BorrowAdmin(admin.ModelAdmin):
         }),
     )
 
-    readonly_fields = ("fine",)
+    readonly_fields = ('user_display', 'user_type_display', 'book_display', "fine", 'max_borrow_days_display', 'book', 'book_categories')
+
+    def book_display(self, obj):
+        return obj.book.book_name if obj.book else "-"
+
+    book_display.short_description = "Tên sách"
+
+    def user_type_display(self, obj):
+        if not obj.user:
+            return "-"
+        return obj.user.get_user_type_display()
+
+    user_type_display.short_description = "Phân quyền"
+
+    def book_categories(self, obj):
+        if not obj.book:
+            return "-"
+        return ", ".join(c.category_name for c in obj.book.categories.all())
+
+    book_categories.short_description = "Thể loại"
+
+    def max_borrow_days_display(self, obj):
+        if not obj or not obj.user:
+            return "-"
+        return f"{obj.max_borrow_days} ngày"
+
+    max_borrow_days_display.short_description = "Thời gian mượn tối đa"
 
     def damage_status_view(self, obj):
         if obj.status == 'returned':
@@ -237,37 +265,22 @@ class BorrowAdmin(admin.ModelAdmin):
     damage_status_view.short_description = "Hư hại"
 
     def save_model(self, request, obj, form, change):
-        if not obj.due_date:
-            obj.due_date = (obj.borrow_date or timezone.now().date()) + timedelta(days=14)
+        if not obj.borrow_date:
+            obj.borrow_date = timezone.now().date()
 
-        if obj.status != 'returned':
-            obj.damage_status = 'none'
-            obj.return_date = None
-            obj.fine = 0
+        if obj.user and obj.book and obj.borrow_date and obj.due_date:
+            max_days = get_max_borrow_days(obj.user, obj.book)
+            max_due_date = obj.borrow_date + timedelta(days=max_days)
 
-        if change:
-            try:
-                old_obj = Borrow.objects.get(pk=obj.pk)
-                if old_obj.status != obj.status:
-                    obj.is_notified = False
-            except Borrow.DoesNotExist:
-                pass
-
-        if obj.status == 'borrowed':
-            reserved_count = Borrow.objects.filter(
-                book=obj.book,
-                status='reserved'
-            ).exclude(pk=obj.pk).count()
-
-            if obj.book.available <= reserved_count:
-                raise ValidationError("Hiện đã có người dùng khác đặt trước.")
-
-        if obj.status == 'returned' and not obj.return_date:
-            obj.return_date = timezone.now().date()
+            if obj.due_date > max_due_date:
+                request._borrow_invalid = True  # 🚩 GẮN CỜ
+                form.add_error(
+                    "due_date",
+                    f"Ngày hết hạn mượn vượt quá {max_days} ngày theo quy định"
+                )
+                return
 
         super().save_model(request, obj, form, change)
-
-        bump_borrows_version()
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
@@ -324,15 +337,30 @@ class BorrowAdmin(admin.ModelAdmin):
     def user_display(self, obj):
         return getattr(obj.user, "account_name", obj.user)
 
-    user_display.short_description = "User"
+    user_display.short_description = "Tài khoản"
 
     def user_id_display(self, obj):
         return getattr(obj.user, "account_id", None)
 
-    user_id_display.short_description = "Account ID"
+    user_id_display.short_description = "ID"
     user_id_display.admin_order_field = "user__account_id"
 
     def status_display(self, obj):
         return obj.get_status_display()
 
     status_display.short_description = "Trạng thái"
+
+    def message_user(self, request, message, level=messages.INFO, extra_tags='', fail_silently=False):
+        if getattr(request, "_borrow_invalid", False) and level == messages.SUCCESS:
+            messages.error(
+                request,
+                "Ngày hết hạn mượn vượt quá giới hạn quy định"
+            )
+            return
+
+        super().message_user(request, message, level, extra_tags, fail_silently)
+
+
+
+
+

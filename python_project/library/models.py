@@ -5,6 +5,14 @@ from django.urls import reverse
 from django.utils import timezone
 
 
+class UserType(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+
 class Account(models.Model):
     id = models.AutoField(primary_key=True)
     account_id = models.CharField("Id tài khoản",max_length=64, unique=True)
@@ -24,11 +32,14 @@ class Account(models.Model):
     )
     status = models.CharField("Trạng thái",max_length=10, choices=STATUS_CHOICES)
 
-    ROLE_CHOICES = (
-        ('Admin', 'Quản trị viên'),
-        ('User', 'User'),
-    )
-    role = models.CharField("Phân quyền",max_length=10, choices=ROLE_CHOICES)
+    USER_TYPE_CHOICES = [
+        ('student', 'Sinh viên'),
+        ('lecturer', 'Giảng viên'),
+        ('staff', 'Cán bộ/Học viên/Cao học'),
+        ('admin', 'Quản trị viên'),
+    ]
+
+    user_type = models.CharField("Phân quyền", max_length=20,choices=USER_TYPE_CHOICES,default='student')
 
     def __str__(self):
         return self.account_name
@@ -98,6 +109,30 @@ class Book(models.Model):
         return reverse('book_detail', kwargs={'pk': self.pk})
 
 
+def get_book_type(book):
+    categories = book.categories.values_list('category_name', flat=True)
+
+    if any("Giáo trình" in c for c in categories):
+        return 'textbook'
+    if any("Tài liệu" in c for c in categories):
+        return 'reference'
+    return 'novel'
+
+RULES = {
+    'student': {'novel': 14,'reference': 21,'textbook': 30,},
+    'staff': {'novel': 30, 'reference': 60, 'textbook': 90,},
+    'lecturer': {'novel': 60, 'reference': 180, 'textbook': 365,}
+}
+
+def get_max_borrow_days(user, book):
+    if not user or not book:
+        return 14
+
+    book_type = get_book_type(book)
+    return RULES.get(user.user_type, {}).get(book_type, 14)
+
+
+
 class Borrow(models.Model):
     borrow_id = models.AutoField("Id mượn", primary_key=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -127,12 +162,35 @@ class Borrow(models.Model):
     )
     status = models.CharField("Trạng thái", max_length=16, choices=STATUS_CHOICES, default='reserved')
 
+    max_borrow_days = models.PositiveIntegerField(
+        "Thời gian mượn tối đa (ngày)",
+        editable=False,
+        null=True
+    )
+
     @property
     def days_until_due(self):
         # Fix logic: Sử dụng date.today() để đồng nhất với borrow_date
         if self.due_date and self.status == 'borrowed':
             return (self.due_date - date.today()).days
         return None
+
+    @property
+    def max_borrow_days(self):
+        return get_max_borrow_days(self.user, self.book)
+
+    def calculate_max_days(self):
+        user_type = self.user.user_type
+        categories = self.book.categories.all()
+
+        rule = (
+            BorrowRule.objects
+            .filter(user_type=user_type, category__in=categories)
+            .order_by('-max_days')
+            .first()
+        )
+
+        return rule.max_days if rule else 14  # fallback an toàn
 
     def calculate_fine(self):
         total_fine = 0
@@ -218,3 +276,15 @@ class BookAssociationRule(models.Model):
 
     def __str__(self):
         return f"{self.antecedent_book.book_name} -> {self.consequent_book.book_name}"
+
+class BorrowRule(models.Model):
+    user_type = models.ForeignKey(UserType, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    max_days = models.PositiveIntegerField("Thời gian mượn tối đa (ngày)")
+
+    class Meta:
+        unique_together = ("user_type", "category")
+
+    def __str__(self):
+        return f"{self.user_type} - {self.category}: {self.max_days} ngày"
+
