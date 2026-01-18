@@ -220,6 +220,15 @@
 </div>
 
 <script>
+  // Script xử lý cuộn trang
+  document.addEventListener("DOMContentLoaded", function() {
+    var savedScroll = sessionStorage.getItem('bookPageScrollPos');
+    if (savedScroll) {
+        window.scrollTo(0, parseInt(savedScroll));
+        sessionStorage.removeItem('bookPageScrollPos');
+    }
+  });
+
   (function() {
     const backdrop = document.getElementById('bookModalBackdrop');
     const closeBtn = document.getElementById('bookModalClose');
@@ -291,6 +300,9 @@
 
     document.getElementById('modalConfirmBorrow').addEventListener('click', () => {
       if (!currentBookId) return;
+
+      // Lưu vị trí cuộn hiện tại trước khi submit
+      sessionStorage.setItem('bookPageScrollPos', window.scrollY);
 
       const form = document.getElementById('borrowRequestForm');
       form.action = `/borrow/reserve/${currentBookId}/`;
