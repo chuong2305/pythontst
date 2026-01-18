@@ -74,6 +74,86 @@ def library_rule(request):
 
 
 @session_login_required
+def must_return_book(request):
+    account = _get_current_account(request)
+    if not account:
+        return redirect('login_view')
+
+    FINE_PER_DAY = 2000  # 2.000đ/ngày
+    today = timezone.now().date()
+
+    # --- PHẦN 1: SÁCH ĐANG MƯỢN (Tính nợ hiện tại) ---
+    current_borrows = Borrow.objects.filter(
+        user=account,
+        status='borrowed'
+    ).select_related('book').order_by('due_date')
+
+    items = []
+    for b in current_borrows:
+        fine_amount = 0
+        status_label = "Đang mượn"
+        status_color = "color: #2563eb; background: #eff6ff; border-color: #bfdbfe;"  # Xanh dương
+        is_overdue = False
+
+        if b.due_date and b.due_date < today:
+            overdue_days = (today - b.due_date).days
+            fine_amount = overdue_days * FINE_PER_DAY
+            status_label = f"Quá hạn {overdue_days} ngày"
+            status_color = "color: #dc2626; background: #fef2f2; border-color: #fecaca;"  # Đỏ
+            is_overdue = True
+        elif b.due_date and b.due_date == today:
+            status_label = "Hạn chót hôm nay"
+            status_color = "color: #d97706; background: #fffbeb; border-color: #fde68a;"  # Cam
+
+        items.append({
+            'book_name': b.book.book_name,
+            'due_date': b.due_date,
+            'amount': fine_amount,
+            'status_label': status_label,
+            'status_color': status_color,
+            'is_overdue': is_overdue,
+            'status_code': 'borrowed'
+        })
+
+    # --- PHẦN 2: SÁCH ĐÃ TRẢ (Lịch sử nợ) ---
+    returned_borrows = Borrow.objects.filter(
+        user=account,
+        status='returned'
+    ).select_related('book').order_by('-return_date')
+
+    history_items = []
+    for b in returned_borrows:
+        fine_amount = 0
+        status_label = "Đã trả đúng hạn"
+        # Màu xanh lá mặc định
+        status_color = "color: #059669; background: #ecfdf5; border-color: #a7f3d0;"
+        is_overdue = False
+
+        # Kiểm tra xem lúc trả có bị quá hạn không
+        if b.due_date and b.return_date and b.return_date > b.due_date:
+            overdue_days = (b.return_date - b.due_date).days
+            fine_amount = overdue_days * FINE_PER_DAY
+            status_label = f"Đã trả (Trễ {overdue_days} ngày)"
+            # Màu xám đỏ nhẹ để thể hiện quá khứ
+            status_color = "color: #991b1b; background: #fef2f2; border-color: #fecaca;"
+            is_overdue = True
+
+        history_items.append({
+            'book_name': b.book.book_name,
+            'due_date': b.return_date,  # Hiển thị ngày thực trả
+            'amount': fine_amount,
+            'status_label': status_label,
+            'status_color': status_color,
+            'is_overdue': is_overdue,
+            'status_code': 'returned'
+        })
+
+    return render(request, 'must-return-book.html', {
+        'items': items,
+        'history_items': history_items
+    })
+
+@session_login_required
 def library_card(request):
     account = _get_current_account(request)
     return render(request, 'library_card.html', {

@@ -1,0 +1,224 @@
+* {
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+}
+
+body {
+    background: #f0f4f8;
+    margin: 0;
+    color: #1e3a5f;
+}
+
+.borrow-wrapper {
+    padding: 30px;
+    box-sizing: border-box;
+    min-height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.warning-panel {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(255, 193, 7, 0.1);
+}
+
+.warning-icon-box {
+    width: 40px;
+    height: 40px;
+    background: #ffecb3;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f57f17;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.warning-content strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 18px;
+    color: #b76e00;
+}
+
+.warning-content span {
+    font-size: 18px;
+    color: #8c5605;
+    line-height: 1.4;
+}
+
+.content-panel {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(30, 58, 95, 0.06);
+    border: 1px solid #eef2f6;
+    padding: 25px;
+}
+
+.panel-title {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-weight: 700;
+    color: #1e3a5f;
+    font-size: 1.25rem;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    border-radius: 12px;
+}
+
+.debt-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.95rem;
+}
+
+.debt-table thead th {
+    background-color: #f8fbff;
+    padding: 15px 20px;
+    font-weight: 600;
+    color: #64748b;
+    text-align: left;
+    border-bottom: 2px solid #eef2f6;
+    white-space: nowrap;
+}
+
+.debt-table tbody td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eef2f6;
+    vertical-align: middle;
+    background: #fff;
+    transition: background 0.2s;
+}
+
+.debt-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.debt-table tbody tr:hover td {
+    background-color: #f8fbff;
+}
+
+.book-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.book-icon {
+    width: 36px;
+    height: 36px;
+    background: #eef3ff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e64d1;
+    flex-shrink: 0;
+}
+
+.book-name {
+    font-weight: 600;
+    color: #1e3a5f;
+}
+
+.date-cell {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.amount-debt {
+    color: #ef4444;
+    font-weight: 700;
+    font-family: monospace;
+    font-size: 1rem;
+    background: #fef2f2;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.amount-zero {
+    color: #10b981;
+    font-weight: 600;
+    font-family: monospace;
+    font-size: 1rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.action-cell {
+    text-align: center;
+}
+
+.btn-action {
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-pay {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+}
+
+.btn-pay:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+}
+
+.btn-disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border: 1px solid #e2e8f0;
+    cursor: not-allowed;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    width: 60px;
+    height: 60px;
+    background: #ecfdf5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    color: #10b981;
+    font-size: 24px;
+}
+
+.empty-state p {
+    color: #64748b;
+    font-size: 1rem;
+    margin: 0;
+}
