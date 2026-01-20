@@ -1,14 +1,16 @@
 from django.contrib import admin
 from django.contrib import messages
+from django.contrib.admin import SimpleListFilter
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.html import format_html
 from django.urls import path
 from django.http import JsonResponse
 from django.core.cache import cache
-from datetime import timedelta
+from datetime import datetime, timedelta
 from .models import get_max_borrow_days
 from .models import Account, Author, Category, Publisher, Book, Borrow
+from django.db.models import Q
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
@@ -98,13 +100,39 @@ class PublisherAdmin(admin.ModelAdmin):
         ]
         return super().changelist_view(request, extra_context=extra_context)
 
+class AddDateRangeFilter(SimpleListFilter):
+    title = "Thời gian"
+    parameter_name = "dateAdd"
+    template = "admin/date_add_range_filter.html"
+
+    def lookups(self, request, model_admin):
+        return ()
+    def has_output(self):
+        return True
+    def expected_parameters(self):
+        return ["start_date", "end_date"]
+    def queryset(self, request, queryset):
+        value = self.value()
+        if not value:
+            return queryset
+
+        try:
+            start, end = value.split("__")
+            if start:
+                queryset = queryset.filter(dateAdd__gte=start)
+            if end:
+                queryset = queryset.filter(dateAdd__lte=end)
+        except ValueError:
+            return queryset
+
+        return queryset
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     list_display = (
         "book_name", "get_author", "get_categories", "get_publisher", "dateAdd",
     )
-    list_filter = ("categories", "author", "publisher", "publishYear")
+    list_filter = (AddDateRangeFilter,"categories", "author", "publisher", "publishYear")
     search_fields = ("book_name", "author__author_name", "publisher__publish_name", "categories__category_name",)
     filter_horizontal = ("categories",)
     ordering = ("book_name",)
@@ -155,36 +183,47 @@ class BookAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
-        from django.db.models import Count
+
+        qs = self.get_queryset(request)
+
+        # ---- APPLY DATE RANGE FILTER (dateAdd) ----
+        date_value = request.GET.get("dateAdd", "")
+        if date_value:
+            try:
+                start, end = date_value.split("__")
+                if start:
+                    qs = qs.filter(dateAdd__gte=start)
+                if end:
+                    qs = qs.filter(dateAdd__lte=end)
+            except ValueError:
+                pass
+
+        # ---- APPLY OTHER LIST FILTERS ----
+        if request.GET.get("categories"):
+            qs = qs.filter(categories=request.GET.get("categories"))
+
+        if request.GET.get("author"):
+            qs = qs.filter(author=request.GET.get("author"))
+
+        if request.GET.get("publisher"):
+            qs = qs.filter(publisher=request.GET.get("publisher"))
+
+        if request.GET.get("publishYear"):
+            qs = qs.filter(publishYear=request.GET.get("publishYear"))
+
+        # ---- STATS BASED ON FILTERED QS ----
         today = timezone.now().date()
         recent_days = today - timedelta(days=30)
 
-        total_books = Book.objects.count()
-        available_books = Book.objects.filter(available__gt=0).count()
-        out_of_stock = Book.objects.filter(available=0).count()
-        recent_books = Book.objects.filter(dateAdd__gte=recent_days).count()
-
-        top_borrowed = (
-            Borrow.objects
-            .filter(borrow_date__gte=recent_days)
-            .values('book__book_name')
-            .annotate(times=Count('pk'))
-            .order_by('-times')
-        )
-        if top_borrowed:
-            top_book = top_borrowed[0]
-            top_book_display = f"{top_book['book__book_name']} ({top_book['times']} lượt)"
-        else:
-            top_book_display = "Không có lượt mượn"
-
         extra_context["stats"] = [
-            {"label": "Tổng số sách", "value": total_books},
-            {"label": "Sách đang có", "value": available_books},
-            {"label": "Sách hết hàng", "value": out_of_stock},
-            {"label": "Sách mới 30 ngày", "value": recent_books},
-            {"label": "Sách mượn nhiều nhất 30 ngày", "value": top_book_display},
+            {"label": "Tổng số sách", "value": qs.count()},
+            {"label": "Sách đang có", "value": qs.filter(available__gt=0).count()},
+            {"label": "Sách hết hàng", "value": qs.filter(available=0).count()},
+            {"label": "Sách mới 30 ngày", "value": qs.filter(dateAdd__gte=recent_days).count()},
         ]
+
         return super().changelist_view(request, extra_context=extra_context)
+
 
 
 BORROW_VERSION_KEY = "borrows_version"
@@ -207,6 +246,32 @@ def bump_borrows_version():
         except ValueError:
             cache.set(BORROW_VERSION_KEY, get_borrows_version() + 1)
 
+class BorrowDateRangeFilter(SimpleListFilter):
+    title = "Thời gian"
+    parameter_name = "borrow_date"
+    template = "admin/date_borrow_range_filter.html"
+
+    def lookups(self, request, model_admin):
+        return ()
+    def has_output(self):
+        return True
+    def expected_parameters(self):
+        return ["start_date", "end_date"]
+    def queryset(self, request, queryset):
+        value = self.value()
+        if not value:
+            return queryset
+
+        try:
+            start, end = value.split("__")
+            if start:
+                queryset = queryset.filter(borrow_date__gte=start)
+            if end:
+                queryset = queryset.filter(borrow_date__lte=end)
+        except ValueError:
+            return queryset
+
+        return queryset
 
 
 @admin.register(Borrow)
@@ -214,7 +279,7 @@ class BorrowAdmin(admin.ModelAdmin):
     change_list_template = "partials/change_list.html"
     list_display = ("user_display", "user_id_display", "book", "borrow_date", "due_date", "status_display",
                     "damage_status_view")
-    list_filter = ("status", "damage_status")
+    list_filter = (BorrowDateRangeFilter,"status", "damage_status")
     search_fields = ("user__account_name", "book__book_name")
 
     actions = ["confirm_borrow", "cancel_reservation"]
@@ -230,7 +295,6 @@ class BorrowAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ('user_display', 'user_type_display', 'book_display', "fine", 'max_borrow_days_display', 'book', 'book_categories')
-
     def book_display(self, obj):
         return obj.book.book_name if obj.book else "-"
 
@@ -284,18 +348,48 @@ class BorrowAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
+
+        qs = self.get_queryset(request)
+        
+        # Manually apply the date range filter
+        borrow_date_value = request.GET.get('borrow_date', '')
+        if borrow_date_value: 
+            try:
+                start, end = borrow_date_value.split("__")
+                if start: 
+                    qs = qs.filter(borrow_date__gte=start)
+                if end:
+                    qs = qs.filter(borrow_date__lte=end)
+            except ValueError:
+                pass
+        
+        # Also apply status filter if present
+        status_value = request.GET.get('status')
+        if status_value: 
+            qs = qs.filter(status=status_value)
+        
+        # Also apply damage_status filter if present
+        damage_status_value = request.GET.get('damage_status')
+        if damage_status_value: 
+            qs = qs.filter(damage_status=damage_status_value)
+
         today = timezone.now().date()
         last_30_days = today - timedelta(days=30)
 
         extra_context["stats"] = [
-            {"label": "Tổng lượt mượn", "value": Borrow.objects.count()},
-            {"label": "30 ngày gần đây", "value": Borrow.objects.filter(borrow_date__gte=last_30_days).count()},
-            {"label": "Đang chờ duyệt", "value": Borrow.objects.filter(status="reserved").count()},
-            {"label": "Đang mượn", "value": Borrow.objects.filter(status="borrowed").count()},
-            {"label": "Đã trả", "value": Borrow.objects.filter(status="returned").count()},
+            {"label": "Tổng lượt mượn", "value": qs.count()},
+            {
+                "label": "30 ngày gần đây",
+                "value": qs.filter(borrow_date__gte=last_30_days).count(),
+            },
+            {"label": "Đang chờ duyệt", "value": qs.filter(status="reserved").count()},
+            {"label": "Đang mượn", "value": qs.filter(status="borrowed").count()},
+            {"label": "Đã trả", "value": qs.filter(status="returned").count()},
         ]
+
         extra_context["initial_version"] = get_borrows_version()
         return super().changelist_view(request, extra_context=extra_context)
+
 
     def get_urls(self):
         urls = super().get_urls()
