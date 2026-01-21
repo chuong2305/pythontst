@@ -79,7 +79,7 @@ def must_return_book(request):
     if not account:
         return redirect('login_view')
 
-    FINE_PER_DAY = 2000  # 2.000đ/ngày
+    FINE_PER_DAY = 3000  # 2.000đ/ngày
     today = timezone.now().date()
 
     # --- PHẦN 1: SÁCH ĐANG MƯỢN (Tính nợ hiện tại) ---

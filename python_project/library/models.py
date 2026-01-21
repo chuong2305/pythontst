@@ -212,6 +212,21 @@ class Borrow(models.Model):
 
         return total_fine
 
+    from datetime import date
+
+    def current_fine(self):
+        if self.status == 'returned' or not self.due_date:
+            return 0
+
+        today = date.today()
+        total = 0
+
+        overdue_days = (today - self.due_date).days
+        if overdue_days > 0:
+            total += overdue_days * 3000
+
+        return total
+
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         old_status = None

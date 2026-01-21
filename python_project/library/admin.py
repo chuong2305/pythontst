@@ -7,6 +7,7 @@ from django.utils.html import format_html
 from django.urls import path
 from django.http import JsonResponse
 from django.core.cache import cache
+from datetime import date
 from datetime import datetime, timedelta
 from .models import get_max_borrow_days
 from .models import Account, Author, Category, Publisher, Book, Borrow
@@ -20,10 +21,12 @@ class AccountAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             "fields": (
-                "account_id", "account_name", "email", "username", "password", "phone", "status", "user_type",
+                "account_id", "account_name", "email", "username", "password", "phone", "status", "user_type","debt_display",
             )
         }),
     )
+    readonly_fields = ("debt_display",)
+
     change_list_template = "partials/change_list.html"
 
     def changelist_view(self, request, extra_context=None):
@@ -39,6 +42,19 @@ class AccountAdmin(admin.ModelAdmin):
         return obj.pk if obj and obj.pk else "Sẽ được tạo sau khi lưu"
 
     account_id_display.short_description = "ID"
+
+    def debt_display(self, obj):
+        borrows = Borrow.objects.filter(
+            user=obj,
+            status__in=['reserved', 'borrowed'],
+            due_date__lt=date.today()
+        )
+
+        total = sum(b.current_fine() for b in borrows)
+
+        return f"{total:,} đ" if total else "0 đ"
+
+    debt_display.short_description = "Còn nợ"
 
 
 @admin.register(Author)
@@ -337,7 +353,7 @@ class BorrowAdmin(admin.ModelAdmin):
             max_due_date = obj.borrow_date + timedelta(days=max_days)
 
             if obj.due_date > max_due_date:
-                request._borrow_invalid = True  # 🚩 GẮN CỜ
+                request._borrow_invalid = True
                 form.add_error(
                     "due_date",
                     f"Ngày hết hạn mượn vượt quá {max_days} ngày theo quy định"
